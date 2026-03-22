@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>쏠트리 프로젝트 현황</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Pretendard',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:20px}
+.header{text-align:center;margin-bottom:32px}
+.header h1{font-size:24px;color:#f8fafc;margin-bottom:4px}
+.header .date{color:#64748b;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:900px;margin:0 auto}
+@media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
+
+.card{background:#1e293b;border-radius:14px;padding:18px;border:1px solid #334155;transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.card-icon{font-size:24px}
+.card-title{font-size:15px;font-weight:700;color:#f1f5f9}
+.card-status{margin-left:auto;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.status-done{background:#065f46;color:#6ee7b7}
+.status-progress{background:#92400e;color:#fcd34d}
+.status-wait{background:#1e3a5f;color:#7dd3fc}
+.status-plan{background:#581c87;color:#d8b4fe}
+
+.card-body{font-size:12px;color:#94a3b8;line-height:1.7}
+.card-body b{color:#cbd5e1}
+.card-body .tag{display:inline-block;background:#334155;color:#94a3b8;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px 2px}
+.card-body .highlight{color:#fbbf24}
+.card-body .link{color:#60a5fa;text-decoration:none}
+.card-body .link:hover{text-decoration:underline}
+
+.section{grid-column:1/-1;margin-top:12px}
+.section h2{font-size:16px;color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px;margin-bottom:4px}
+
+.timeline{grid-column:1/-1;background:#1e293b;border-radius:14px;padding:20px;border:1px solid #334155}
+.timeline h3{font-size:14px;color:#f1f5f9;margin-bottom:14px}
+.tl-item{display:flex;gap:12px;margin-bottom:14px;position:relative}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.tl-content{font-size:12px;color:#94a3b8;line-height:1.6}
+.tl-content b{color:#e2e8f0}
+.tl-line{position:absolute;left:4px;top:16px;bottom:-14px;width:2px;background:#334155}
+
+.flow{grid-column:1/-1;background:#1e293b;border-radius:14px;padding:20px;border:1px solid #334155}
+.flow h3{font-size:14px;color:#f1f5f9;margin-bottom:14px}
+.flow-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+.flow-box{background:#334155;border-radius:8px;padding:8px 14px;font-size:12px;color:#e2e8f0;text-align:center;min-width:80px}
+.flow-box.done{background:#065f46;color:#6ee7b7}
+.flow-box.current{background:#92400e;color:#fcd34d;border:2px solid #fbbf24}
+.flow-box.future{background:#1e3a5f;color:#7dd3fc;border:1px dashed #3b82f6}
+.flow-arrow{color:#475569;font-size:18px}
+
+.cost{grid-column:1/-1;background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:14px;padding:20px;border:1px solid #334155}
+.cost h3{font-size:14px;color:#f1f5f9;margin-bottom:14px}
+.cost-row{display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px}
+.cost-item{text-align:center}
+.cost-num{font-size:28px;font-weight:800;color:#fbbf24}
+.cost-label{font-size:11px;color:#64748b;margin-top:2px}
+
+.github{grid-column:1/-1;background:#1e293b;border-radius:14px;padding:18px;border:1px solid #334155}
+.github h3{font-size:14px;color:#f1f5f9;margin-bottom:12px}
+.repo-list{display:flex;flex-direction:column;gap:8px}
+.repo{display:flex;align-items:center;gap:10px;background:#0f172a;border-radius:8px;padding:10px 14px}
+.repo-name{font-size:13px;font-weight:600;color:#60a5fa;flex:1}
+.repo-desc{font-size:11px;color:#64748b}
+.repo-live{font-size:10px;background:#065f46;color:#6ee7b7;padding:2px 8px;border-radius:10px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>쏠트리 프로젝트 현황 대시보드</h1>
+  <div class="date">2026-03-22 Claude Code 세션 기록</div>
+</div>
+
+<div class="grid">
+
+  <!-- 오늘 논의 타임라인 -->
+  <div class="timeline">
+    <h3>오늘 논의 타임라인</h3>
+    <div class="tl-item"><div class="tl-dot" style="background:#f87171"></div><div class="tl-line"></div><div class="tl-content"><b>디스코드 봇 시도 - 폐기</b><br>프로젝트별 에이전트 봇 구축 시도. API 비용 문제 + 파일 스캔 방식 한계로 방향 전환</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#fbbf24"></div><div class="tl-line"></div><div class="tl-content"><b>대화 기록 정리 방안 논의</b><br>디스코드 채널별 아카이브 - claude.ai Projects - Claude Code hooks 자동기록으로 최종 결정</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#34d399"></div><div class="tl-line"></div><div class="tl-content"><b>hooks 자동 작업기록 설정 완료</b><br>Stop 이벤트 시 프로젝트별 .claude/work_logs/에 자동 기록</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#34d399"></div><div class="tl-line"></div><div class="tl-content"><b>warehouse GitHub Pages 배포 완료</b><br>별도 저장소 분리, Apps Script 연동, 입출고 데이터 복원 (53,124건)</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#34d399"></div><div class="tl-line"></div><div class="tl-content"><b>warehouse 버그 수정 + 기능 추가</b><br>printQueue 충돌, 저장 버튼, TOP100 순위, 치수 검증, 층별 스크롤 통합</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#60a5fa"></div><div class="tl-line"></div><div class="tl-content"><b>warehouse Q2 실험 브랜치</b><br>AI 배치 최적화 프로토타입 완성. 박스 실측 데이터 대기 중</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#34d399"></div><div class="tl-line"></div><div class="tl-content"><b>frequency GitHub Pages 배포 완료</b><br>안전재고 발주 분석 시스템 라이브</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:#c084fc"></div><div class="tl-content"><b>ERP 자체 개발 논의</b><br>이메일 발주 파싱 - ERP 등록 자동화. Outlook + Claude API 필요. 비용 검토 중</div></div>
+  </div>
+
+  <!-- 프로젝트 카드들 -->
+  <div class="section"><h2>프로젝트 현황</h2></div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">📦</span>
+      <span class="card-title">warehouse</span>
+      <span class="card-status status-done">안정</span>
+    </div>
+    <div class="card-body">
+      창고관리 시스템 (WMS)<br>
+      <b>v1.0-2026Q1</b> 태그 세이브 완료<br>
+      <span class="tag">Google Sheets 연동</span>
+      <span class="tag">입출고 53,124건</span>
+      <span class="tag">TOP100 순위</span>
+      <span class="tag">치수 검증</span><br>
+      <a class="link" href="https://nuckythompson28-code.github.io/warehouse/index.html" target="_blank">라이브 링크</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">🧠</span>
+      <span class="card-title">warehouse AI 배치</span>
+      <span class="card-status status-wait">실측 대기</span>
+    </div>
+    <div class="card-body">
+      소재별 밀집 배치 최적화<br>
+      브랜치: <b>experiment-q2-optimize</b><br>
+      <span class="highlight">박스 타입별 실제 크기(mm) 측정 필요</span><br>
+      <span class="tag">반박스</span><span class="tag">풀박스</span><span class="tag">흰색</span><span class="tag">노란색</span><span class="tag">초소형</span><span class="tag">서랍</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">📈</span>
+      <span class="card-title">frequency</span>
+      <span class="card-status status-done">라이브</span>
+    </div>
+    <div class="card-body">
+      안전재고 발주 분석 시스템<br>
+      3개월 주문 데이터 고빈도 품목 탐지<br>
+      <a class="link" href="https://nuckythompson28-code.github.io/frequency/index.html" target="_blank">라이브 링크</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">🛒</span>
+      <span class="card-title">BUY</span>
+      <span class="card-status status-done">완료</span>
+    </div>
+    <div class="card-body">
+      구매 발주서 관리 및 자동화<br>
+      <span class="tag">거래처 관리</span><span class="tag">발주서 생성</span><span class="tag">Outlook 이메일</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">🦺</span>
+      <span class="card-title">TBM</span>
+      <span class="card-status status-done">완료</span>
+    </div>
+    <div class="card-body">
+      일일 안전교육 문서 자동생성<br>
+      <span class="tag">요일별</span><span class="tag">부서별</span><span class="tag">Google Drive 연동</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">🏭</span>
+      <span class="card-title">CNC_CODES</span>
+      <span class="card-status status-done">완료</span>
+    </div>
+    <div class="card-body">
+      CNC 교육자료 생성<br>
+      <span class="tag">G코드 해설</span><span class="tag">PDF/PPTX</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">📊</span>
+      <span class="card-title">CNC_ANAL</span>
+      <span class="card-status status-done">완료</span>
+    </div>
+    <div class="card-body">
+      CNC 생산현황 대시보드<br>
+      <span class="tag">일별 분석</span><span class="tag">엑셀 자동화</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">🏗️</span>
+      <span class="card-title">evac (배출관리)</span>
+      <span class="card-status status-done">완료</span>
+    </div>
+    <div class="card-body">
+      배출시설 운영기록부 자동생성<br>
+      <span class="tag">기상 API</span><span class="tag">Word 문서</span>
+    </div>
+  </div>
+
+  <!-- ERP 대체 로드맵 -->
+  <div class="section"><h2>ERP 자체 개발 로드맵</h2></div>
+
+  <div class="flow">
+    <h3>이메일 발주 자동화 (미구현)</h3>
+    <div class="flow-row">
+      <div class="flow-box done">이메일 수신</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box future">AI 파싱<br><small>Claude API</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box future">엑셀 자동생성</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box current">ERP 등록<br><small>현재 수동</small></div>
+    </div>
+    <div class="flow-row" style="margin-top:16px">
+      <div style="font-size:12px;color:#64748b;width:100%;text-align:center">--- 아래는 이미 구현됨 ---</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-box done">ERP 엑셀 5개</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box done">자동 다운로드<br><small>erp_download.py</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box done">JSON 변환<br><small>build_json.py</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box done">대시보드<br><small>warehouse/frequency</small></div>
+    </div>
+  </div>
+
+  <!-- 비용 -->
+  <div class="cost">
+    <h3>비용 현황</h3>
+    <div class="cost-row">
+      <div class="cost-item">
+        <div class="cost-num">$0</div>
+        <div class="cost-label">현재 추가 비용<br>(Max 구독 내)</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">~$5</div>
+        <div class="cost-label">이메일 파싱 시<br>Claude API 월 예상</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">?</div>
+        <div class="cost-label">외주 ERP<br>현재 월 비용</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GitHub 저장소 -->
+  <div class="github">
+    <h3>GitHub Pages 라이브</h3>
+    <div class="repo-list">
+      <div class="repo">
+        <span class="repo-name">warehouse</span>
+        <span class="repo-desc">창고관리 WMS</span>
+        <span class="repo-live">LIVE</span>
+      </div>
+      <div class="repo">
+        <span class="repo-name">frequency</span>
+        <span class="repo-desc">안전재고 분석</span>
+        <span class="repo-live">LIVE</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
