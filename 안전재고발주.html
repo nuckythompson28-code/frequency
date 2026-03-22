@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Soltri 선생산 관리</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+
+.top-bar{background:linear-gradient(135deg,#1e293b,#334155);padding:16px 24px;border-bottom:2px solid #3b82f6;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.top-bar h1{font-size:20px;color:#f8fafc}
+.top-bar h1 em{font-style:normal;color:#3b82f6}
+.top-bar .sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.top-bar .actions{display:flex;gap:8px}
+
+.filter-bar{background:#1a2540;border-bottom:1px solid #334155;padding:10px 24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.fi{display:flex;align-items:center;gap:7px;font-size:12px}
+.fi label{color:#94a3b8;white-space:nowrap}
+.fi input[type=range]{width:90px;accent-color:#3b82f6;cursor:pointer}
+.fi input[type=number]{width:64px;background:#334155;border:1px solid #475569;color:#e2e8f0;border-radius:4px;padding:3px 7px;font-size:12px}
+.fv{font-weight:800;color:#3b82f6;min-width:28px;text-align:right}
+.filter-div{width:1px;height:20px;background:#334155}
+.btn-sel{background:#0f2a1a;border:1px solid #22c55e;color:#4ade80;font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:600}
+.btn-sel:hover{background:#1a3d28}
+.btn-clr{background:#2a1f0f;border:1px solid #f59e0b;color:#fbbf24;font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:600}
+.btn-clr:hover{background:#3d2e10}
+.btn{padding:8px 18px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-print{background:#059669;color:#fff}
+.btn-print:hover{background:#047857}
+.btn-reset{background:#475569;color:#e2e8f0}
+.btn-reset:hover{background:#64748b}
+.btn-undo{background:#f59e0b;color:#1a1a1a}
+.btn-undo:hover{background:#d97706}
+.btn-refresh{background:#3b82f6;color:#fff}
+.btn-refresh:hover{background:#2563eb}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 24px}
+.stat{background:#1e293b;border-radius:10px;padding:14px;border:1px solid #334155;text-align:center}
+.stat .num{font-size:28px;font-weight:800}
+.stat .lbl{font-size:11px;color:#94a3b8;margin-top:2px}
+.stat.danger .num{color:#ef4444}
+.stat.warn .num{color:#f59e0b}
+.stat.ok .num{color:#22c55e}
+.stat.info .num{color:#3b82f6}
+
+.section{padding:8px 24px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;user-select:none}
+.section-header h2{font-size:16px;font-weight:700}
+.section-header .badge{padding:2px 10px;border-radius:10px;font-size:13px;font-weight:700}
+.section-header .toggle{font-size:12px;color:#64748b;margin-left:auto}
+
+.section.active .section-header h2{color:#ef4444}
+.section.active .badge{background:#ef444433;color:#f87171}
+.section.graveyard .section-header h2{color:#64748b}
+.section.graveyard .badge{background:#47556933;color:#94a3b8}
+.section.stocked .section-header h2{color:#22c55e}
+.section.stocked .badge{background:#22c55e33;color:#4ade80}
+.section.producing .section-header h2{color:#3b82f6}
+.section.producing .badge{background:#3b82f633;color:#60a5fa}
+.section.completed .section-header h2{color:#a78bfa}
+.section.completed .badge{background:#7c3aed33;color:#c4b5fd}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px}
+
+.card{background:#1e293b;border:2px solid #334155;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card:hover{border-color:#3b82f6;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.card.sent{opacity:.35;pointer-events:none;border-color:#334155}
+.card.sending{animation:sendAnim .4s ease-out forwards}
+
+@keyframes sendAnim{
+  0%{transform:scale(1);opacity:1}
+  50%{transform:scale(.95);opacity:.5}
+  100%{transform:scale(.9)translateY(10px);opacity:0}
+}
+@keyframes reviveAnim{
+  0%{transform:scale(.9);opacity:0}
+  100%{transform:scale(1);opacity:1}
+}
+
+.card .row1{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.card .chisu{font-size:20px;font-weight:800;flex:1}
+.card .jaejil-badge{padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;color:#fff}
+.jaejil-CN10{background:#b8860b}
+.jaejil-RS40{background:#0d9488}
+.jaejil-CM20{background:#6b7280}
+
+.card .row2{display:flex;gap:16px;font-size:13px;color:#94a3b8}
+.card .row2 strong{color:#e2e8f0}
+
+.card .stock-bar{margin-top:8px;height:6px;background:#334155;border-radius:3px;overflow:hidden}
+.card .stock-fill{height:100%;border-radius:3px;transition:width .3s}
+.stock-fill.danger{background:#ef4444}
+.stock-fill.warn{background:#f59e0b}
+.stock-fill.ok{background:#22c55e}
+
+.card .stock-label{display:flex;justify-content:space-between;font-size:11px;margin-top:3px;color:#64748b}
+.card .stock-label .stock-num{font-weight:800;font-size:14px}
+.card .timeline{position:relative;height:8px;background:#1e293b;border-radius:4px;margin-top:6px;border:1px solid #334155}
+.card .timeline .dot{position:absolute;width:5px;height:5px;border-radius:50%;background:#3b82f6;top:50%;transform:translateY(-50%)}
+.card .timeline .dot.recent{background:#f59e0b}
+.card .timeline .dot.balju{background:#ef4444;width:7px;height:7px;z-index:2;box-shadow:0 0 4px #ef4444}
+.card .timeline-label{display:flex;justify-content:space-between;font-size:8px;color:#475569;margin-top:1px}
+.card .timeline-label .mid{position:absolute;left:50%;transform:translateX(-50%)}
+.card .stock-label .stock-num.danger{color:#ef4444}
+.card .stock-label .stock-num.warn{color:#f59e0b}
+.card .stock-label .stock-num.ok{color:#22c55e}
+
+.card .action-hint{position:absolute;top:0;right:0;bottom:0;width:60px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:20px;background:linear-gradient(90deg,transparent,#ef444444)}
+.card:hover .action-hint{opacity:1}
+.card .card-btns{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .2s;z-index:10}
+.card:hover .card-btns{opacity:1}
+.card .card-btn{background:#334155;border:1px solid #475569;color:#94a3b8;font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer}
+.card .card-btn:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.card .card-btn.excel{color:#22c55e;border-color:#22c55e44}
+.card .card-btn.excel:hover{background:#22c55e;color:#fff}
+.card .card-btn.excel.selected{background:#22c55e;color:#fff;opacity:1}
+
+.card-grave .action-hint{background:linear-gradient(90deg,transparent,#22c55e44)}
+
+.empty-msg{text-align:center;padding:40px;color:#475569;font-size:14px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid #334155;padding:10px 24px;border-radius:8px;font-size:13px;color:#e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:200;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#1e293b;border:2px solid #3b82f6;border-radius:12px;width:90%;max-width:600px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #334155}
+.modal-header h3{font-size:18px;color:#f8fafc}
+.modal-header .close-btn{background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer}
+.modal-header .close-btn:hover{color:#fff}
+.modal-body{overflow-y:auto;padding:0}
+.history-table{width:100%;border-collapse:collapse;font-size:13px}
+.history-table th{background:#334155;color:#e2e8f0;padding:8px 12px;text-align:left;position:sticky;top:0;font-size:12px}
+.history-table td{padding:8px 12px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+.history-table tr:nth-child(even){background:#162032}
+.history-table tr:hover{background:#1e3a5f}
+.history-table .qty{text-align:right;font-weight:700;color:#f59e0b}
+.modal-loading{padding:40px;text-align:center;color:#64748b}
+.history-tip{padding:8px 16px;font-size:11px;color:#64748b;border-top:1px solid #334155;text-align:center}
+
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff;color:#1a1a1a}
+  .top-bar{background:#fff;border-bottom:2px solid #1e3a5f;position:static}
+  .top-bar h1{color:#1e3a5f}
+  .stat{border-color:#ddd}
+  .stat .num{color:#1a1a1a!important}
+  .card{border-color:#ddd;break-inside:avoid}
+  .section.graveyard{display:none}
+  .card .chisu{color:#1a1a1a}
+  .card .row2{color:#666}
+  .card .row2 strong{color:#1a1a1a}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1><em>Soltri</em> W/R 선생산 관리</h1>
+    <div class="sub">100일간 10회 이상 반복 주문 · 총량 500개 이하 · 재고 30% 미만 · 7일내 미생산 품목</div>
+  </div>
+  <div class="actions no-print">
+    <button class="btn btn-refresh" onclick="refreshCheck()">리프레시</button>
+    <button class="btn" style="background:#22c55e;color:#fff;display:none" onclick="downloadExcel()" id="btnExcel">엑셀 다운로드 (<span id="excelCount">0</span>)</button>
+    <button class="btn btn-undo" onclick="undoLast()" id="btnUndo" style="display:none">되돌리기</button>
+    <button class="btn btn-reset" onclick="resetAll()">초기화</button>
+    <button class="btn btn-print" onclick="window.print()">인쇄</button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="fi"><label>주문횟수 ≥</label>
+    <input type="range" id="fFreq" min="1" max="50" value="10" oninput="applyFilter()">
+    <span class="fv" id="fFreqVal">10</span><span style="color:#64748b;font-size:11px">회</span>
+  </div>
+  <div class="filter-div"></div>
+  <div class="fi"><label>재고율 ≤</label>
+    <input type="range" id="fStock" min="0" max="100" value="30" oninput="applyFilter()">
+    <span class="fv" id="fStockVal">30</span><span style="color:#64748b;font-size:11px">%</span>
+  </div>
+  <div class="filter-div"></div>
+  <div class="fi"><label>점수 ≥</label>
+    <input type="range" id="fScore" min="0" max="100" value="0" oninput="applyFilter()">
+    <span class="fv" id="fScoreVal">0</span>
+  </div>
+  <div class="filter-div"></div>
+  <div class="fi"><label>총량 ≤</label>
+    <input type="number" id="fQty" min="1" max="9999" value="500" oninput="applyFilter()">
+    <span style="color:#64748b;font-size:11px">개</span>
+  </div>
+  <div class="filter-div"></div>
+  <button class="btn-sel" onclick="selectAllActive()">전체 선택 →엑셀</button>
+  <button class="btn-clr" onclick="clearExcel()">선택 해제</button>
+  <span id="filterCount" style="font-size:11px;color:#64748b;margin-left:4px"></span>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="section active" id="secActive">
+  <div class="section-header" onclick="toggleSection('active')">
+    <h2>선생산 필요</h2>
+    <span class="badge" id="badgeActive">0</span>
+    <span class="toggle" id="toggleActive">▼</span>
+  </div>
+  <div class="grid" id="gridActive"></div>
+</div>
+
+<div class="section graveyard" id="secGrave">
+  <div class="section-header" onclick="toggleSection('grave')">
+    <h2>생산지시 중</h2>
+    <span class="badge" id="badgeGrave">0</span>
+    <span class="toggle" id="toggleGrave">▼</span>
+  </div>
+  <div class="grid" id="gridGrave"></div>
+</div>
+
+<div class="section completed" id="secCompleted">
+  <div class="section-header" onclick="toggleSection('completed')">
+    <h2>생산지시 완료</h2>
+    <span class="badge" id="badgeCompleted">0</span>
+    <span class="toggle" id="toggleCompleted">▼</span>
+  </div>
+  <div class="grid" id="gridCompleted"></div>
+</div>
+
+<div class="section stocked" id="secStocked">
+  <div class="section-header" onclick="toggleSection('stocked')">
+    <h2>재고 충분 (생산 완료)</h2>
+    <span class="badge" id="badgeStocked">0</span>
+    <span class="toggle" id="toggleStocked">▶</span>
+  </div>
+  <div class="grid" id="gridStocked" style="display:none"></div>
+</div>
+
+<div class="section producing" id="secProd">
+  <div class="section-header" onclick="toggleSection('prod')">
+    <h2>이미 생산중 (7일 내 가공이력)</h2>
+    <span class="badge" id="badgeProd">0</span>
+    <span class="toggle" id="toggleProd">▶</span>
+  </div>
+  <div class="grid" id="gridProd" style="display:none"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">주문 이력</h3>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="modal-loading">로딩중...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let ITEMS = [];
+let excelList = new Set();  // 엑셀 내보낼 품목 키
+
+let filterFreq = 10, filterStock = 30, filterScore = 0, filterQty = 500;
+
+function applyFilter() {
+  filterFreq  = parseInt(document.getElementById('fFreq').value)  || 1;
+  filterStock = parseInt(document.getElementById('fStock').value) || 0;
+  filterScore = parseInt(document.getElementById('fScore').value) || 0;
+  filterQty   = parseInt(document.getElementById('fQty').value)   || 9999;
+  document.getElementById('fFreqVal').textContent  = filterFreq;
+  document.getElementById('fStockVal').textContent = filterStock;
+  document.getElementById('fScoreVal').textContent = filterScore;
+  render();
+}
+
+function getActiveFiltered() {
+  const isStocked = r => r.stock >= 0 && r.stock_ratio > filterStock;
+  return ITEMS.filter(r =>
+    !r.in_production && !isStocked(r) && !isInGrave(r.key) && !(r.key in completed) &&
+    r.freq >= filterFreq && r.total_qty <= filterQty && r.score >= filterScore
+  );
+}
+
+function selectAllActive() {
+  getActiveFiltered().forEach(r => excelList.add(r.key));
+  document.getElementById('excelCount').textContent = excelList.size;
+  document.getElementById('btnExcel').style.display = excelList.size > 0 ? '' : 'none';
+  render();
+}
+
+function clearExcel() {
+  excelList.clear();
+  document.getElementById('excelCount').textContent = 0;
+  document.getElementById('btnExcel').style.display = 'none';
+  render();
+}
+
+const STORAGE_KEY = 'soltri_graveyard';
+const COMPLETED_KEY = 'soltri_completed';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwGhEtnGrHKXr3dVg_9db_kyeWAH6gS4pu4NNk09H8X6Rsr2dDb4B50BLMG_G20K7s/exec';
+let graveyard = {};
+let completed = {};
+let undoStack = [];
+
+function saveLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(graveyard));
+  localStorage.setItem(COMPLETED_KEY, JSON.stringify(completed));
+}
+
+function syncToSheet(type) {
+  if (!APPS_SCRIPT_URL) return;
+  const data = encodeURIComponent(JSON.stringify(type === 'completed' ? completed : graveyard));
+  const cbName = '_sync_' + Date.now();
+  window[cbName] = function() { delete window[cbName]; try { document.body.removeChild(sc); } catch(e){} };
+  const sc = document.createElement('script');
+  sc.src = `${APPS_SCRIPT_URL}?action=save&type=${type}&data=${data}&callback=${cbName}`;
+  sc.onerror = () => { delete window[cbName]; };
+  document.body.appendChild(sc);
+}
+
+function save() {
+  saveLocal();
+  syncToSheet('graveyard');
+}
+function saveCompleted() {
+  saveLocal();
+  syncToSheet('completed');
+}
+
+function loadGraveyardFromSheet(callback) {
+  if (!APPS_SCRIPT_URL) {
+    graveyard = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    completed = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}');
+    callback(); return;
+  }
+  const cbName = '_loadGrave_' + Date.now();
+  window[cbName] = function(data) {
+    graveyard = data.graveyard || {};
+    completed = data.completed || {};
+    saveLocal();
+    delete window[cbName];
+    try { document.body.removeChild(sc); } catch(e){}
+    callback();
+  };
+  const sc = document.createElement('script');
+  sc.src = `${APPS_SCRIPT_URL}?action=load&callback=${cbName}`;
+  sc.onerror = function() {
+    graveyard = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    completed = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}');
+    delete window[cbName];
+    callback();
+  };
+  document.body.appendChild(sc);
+}
+
+function isInGrave(key) { return key in graveyard; }
+function graveKeys() { return Object.keys(graveyard); }
+
+// 리프레시: JSON 다시 읽고, 무덤 품목 중 재고가 보냈을때보다 줄었으면 복귀
+function refreshCheck() {
+  loadFromSheet(function(newData) {
+    if (!newData) { showToast('데이터 로드 실패'); return; }
+    ITEMS = newData;
+    showToast('데이터 갱신 완료');
+    render();
+  });
+}
+
+function getStockClass(r) {
+  if (r.stock < 0) return 'ok';
+  if (r.stock_ratio <= 10) return 'danger';
+  if (r.stock_ratio <= 20) return 'warn';
+  return 'ok';
+}
+
+function makeCard(r, type) {
+  const sc = getStockClass(r);
+  const stockW = r.stock >= 0 ? Math.min(100, r.stock_ratio) : 50;
+  const stockDisplay = r.stock >= 0 ? r.stock + '개' : '-';
+  const hint = type === 'active' ? '▶' : type === 'grave' ? '◀' : '';
+  const cardClass = type === 'grave' ? 'card card-grave' : 'card';
+  const onclick = type === 'active' ? `sendToGrave('${r.key}')` : type === 'grave' ? `reviveFromGrave('${r.key}')` : '';
+  const clickAttr = onclick ? `onclick="${onclick}"` : '';
+  const excelSel = excelList.has(r.key) ? ' selected' : '';
+  const cardBtns = `<div class="card-btns">
+    <span class="card-btn" onclick="event.stopPropagation();showHistory('${r.key}','${r.chisu}','${r.jaejil}')">이력</span>
+    ${(type === 'active' || type === 'grave') ? `<span class="card-btn excel${excelSel}" onclick="event.stopPropagation();toggleExcel('${r.key}')" id="xl-${r.key.replace(/[*|.]/g,'_')}">엑셀</span>` : ''}
+  </div>`;
+  const pointerStyle = type === 'prod' ? 'cursor:default' : '';
+
+  return `<div class="${cardClass}" ${clickAttr} style="${pointerStyle}" id="card-${r.key.replace(/[*|.]/g,'_')}">
+    ${cardBtns}
+    <div class="row1">
+      <span class="chisu">${r.chisu}</span>
+      <span class="jaejil-badge jaejil-${r.jaejil}">${r.jaejil}</span>
+    </div>
+    <div class="row2">
+      <span>주문 <strong>${r.freq}회</strong></span>
+      <span>총량 <strong>${r.total_qty}개</strong></span>
+      <span>평균 <strong>${r.avg_qty}/회</strong></span>
+    </div>
+    <div class="stock-bar"><div class="stock-fill ${sc}" style="width:${stockW}%"></div></div>
+    <div class="stock-label">
+      <span>${type === 'grave' && r._graveDate ? '지시일 ' + String(r._graveDate).slice(0,10) : '현재고'}</span>
+      <span class="stock-num ${sc}">${stockDisplay}</span>
+    </div>
+    <div class="timeline" id="tl-${r.key.replace(/[*|.]/g,'_')}"></div>
+    <div class="timeline-label" style="position:relative"><span>100일</span><span class="mid">50일</span><span>오늘</span></div>
+    ${hint ? `<div class="action-hint">${hint}</div>` : ''}
+  </div>`;
+}
+
+function render() {
+
+  // 재고율 기준은 필터값 사용
+  const isStocked = r => r.stock >= 0 && r.stock_ratio > filterStock;
+
+  const activeItems = ITEMS.filter(r =>
+    !r.in_production && !isStocked(r) && !isInGrave(r.key) && !(r.key in completed) &&
+    r.freq >= filterFreq && r.total_qty <= filterQty && r.score >= filterScore
+  );
+  const graveItems = ITEMS.filter(r => isInGrave(r.key) && !isStocked(r));
+  graveItems.forEach(r => { r._graveDate = graveyard[r.key] || ''; });
+  const completedItems = ITEMS.filter(r => r.key in completed);
+  completedItems.forEach(r => { r._completedDate = completed[r.key].completedDate || ''; r._graveDate = completed[r.key].graveDate || ''; });
+  const stockedItems = ITEMS.filter(r => isStocked(r) && !isInGrave(r.key));
+  // 생산중 = 7일내 가공이력 있고 재고 아직 부족
+  const prodItems = ITEMS.filter(r => r.in_production && !isStocked(r) && !isInGrave(r.key));
+
+  document.getElementById('gridActive').innerHTML = activeItems.length
+    ? activeItems.map(r => makeCard(r, 'active')).join('')
+    : '<div class="empty-msg">모든 품목 생산지시 중!</div>';
+  document.getElementById('gridGrave').innerHTML = graveItems.length
+    ? graveItems.map(r => makeCard(r, 'grave')).join('')
+    : '<div class="empty-msg">아직 없음</div>';
+  document.getElementById('gridCompleted').innerHTML = completedItems.length
+    ? completedItems.map(r => makeCard(r, 'completed')).join('')
+    : '<div class="empty-msg">아직 없음</div>';
+  document.getElementById('badgeCompleted').textContent = completedItems.length;
+  document.getElementById('gridStocked').innerHTML = stockedItems.length
+    ? stockedItems.map(r => makeCard(r, 'stocked')).join('')
+    : '<div class="empty-msg">아직 없음</div>';
+  document.getElementById('gridProd').innerHTML = prodItems.map(r => makeCard(r, 'prod')).join('');
+
+  document.getElementById('badgeActive').textContent = activeItems.length;
+  document.getElementById('badgeGrave').textContent = graveItems.length;
+  document.getElementById('badgeStocked').textContent = stockedItems.length;
+  document.getElementById('badgeProd').textContent = prodItems.length;
+
+  // stats
+  const dangerCount = activeItems.filter(r => r.stock_ratio <= 10).length;
+  const warnCount = activeItems.filter(r => r.stock_ratio > 10 && r.stock_ratio <= 20).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat danger"><div class="num">${dangerCount}</div><div class="lbl">재고 10% 이하</div></div>
+    <div class="stat warn"><div class="num">${warnCount}</div><div class="lbl">재고 20% 이하</div></div>
+    <div class="stat ok"><div class="num">${graveItems.length}</div><div class="lbl">생산지시 중</div></div>
+    <div class="stat info"><div class="num">${stockedItems.length}</div><div class="lbl">재고 충분</div></div>
+  `;
+
+  document.getElementById('btnUndo').style.display = undoStack.length ? '' : 'none';
+  const fc = document.getElementById('filterCount');
+  if (fc) fc.textContent = `필터 결과 ${activeItems.length}개`;
+
+  if (typeof renderTimelines === 'function') renderTimelines();
+}
+
+function sendToGrave(key) {
+  if (isInGrave(key)) return;
+  graveyard[key] = new Date().toISOString();  // "2026-03-20T09:30:00.000Z" 시간까지 저장
+  undoStack.push({ action: 'send', key });
+  save();
+  showToast('생산지시 중 처리됨');
+  render();
+}
+
+function reviveFromGrave(key) {
+  const oldDate = graveyard[key];
+  delete graveyard[key];
+  undoStack.push({ action: 'revive', key, oldDate });
+  save();
+  showToast('선생산 리스트로 복귀');
+  render();
+}
+
+function undoLast() {
+  if (!undoStack.length) return;
+  const last = undoStack.pop();
+  if (last.action === 'send') {
+    delete graveyard[last.key];
+  } else {
+    graveyard[last.key] = last.oldDate || '';
+  }
+  save();
+  showToast('되돌리기 완료');
+  render();
+}
+
+function autoRemoveGraveyard() {
+  let removed = 0;
+  for (const key of Object.keys(graveyard)) {
+    const item = ITEMS.find(r => r.key === key);
+    const graveDate = String(graveyard[key]).slice(0, 10);
+    if (item && item.latest_balju && graveDate && item.latest_balju >= graveDate) {
+      completed[key] = { graveDate, completedDate: item.latest_balju };
+      delete graveyard[key];
+      removed++;
+    }
+  }
+  if (removed > 0) {
+    save();
+    saveCompleted();
+    showToast(`발주 확인 ${removed}개 → 생산지시 완료로 이동`);
+  }
+}
+
+function autoCleanCompleted() {
+  let removed = 0;
+  for (const key of Object.keys(completed)) {
+    const item = ITEMS.find(r => r.key === key);
+    if (item && item.stock >= 0 && item.stock_ratio > filterStock) {
+      delete completed[key];
+      removed++;
+    }
+  }
+  if (removed > 0) {
+    saveCompleted();
+    showToast(`재고 충족 ${removed}개 → 생산지시 완료에서 자동 제거`);
+  }
+}
+
+function resetAll() {
+  if (!confirm('생산지시 기록을 모두 초기화할까요?')) return;
+  graveyard = {};
+  undoStack = [];
+  save();
+  showToast('초기화 완료');
+  render();
+}
+
+function toggleExcel(key) {
+  if (excelList.has(key)) excelList.delete(key);
+  else excelList.add(key);
+  document.getElementById('excelCount').textContent = excelList.size;
+  document.getElementById('btnExcel').style.display = excelList.size > 0 ? '' : 'none';
+  render();
+}
+
+// 재질 → 품목/재질 코드 변환
+function toJaejilCode(jaejil) {
+  return 'W/' + jaejil;
+}
+
+// 치수 → 발주서 형식 (내경*외경*높이 → 외경 x 내경 x 높이)
+function toBaljuChisu(chisu) {
+  const p = chisu.split('*');
+  if (p.length === 3) return p[1] + ' x ' + p[0] + ' x ' + p[2];
+  return chisu.replace(/\*/g, ' x ');
+}
+
+function downloadExcel() {
+  if (excelList.size === 0) { showToast('엑셀로 내보낼 품목을 선택하세요'); return; }
+
+  const selected = ITEMS.filter(r => excelList.has(r.key));
+  const today = new Date();
+  const yy = today.getFullYear().toString().slice(2);
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  const dateStr = yy + mm + dd;
+
+  const future = new Date(today);
+  let bizDays = 0;
+  while (bizDays < 5) {
+    future.setDate(future.getDate() + 1);
+    const dow = future.getDay();
+    if (dow !== 0 && dow !== 6) bizDays++;
+  }
+
+  // JS Date → Excel 날짜 시리얼 (1900-01-00 기준)
+  function toExcelDate(d) {
+    return 25569 + (d.getTime() - d.getTimezoneOffset() * 60000) / 86400000;
+  }
+
+  // 노란색 스타일
+  const YELLOW = {patternType:'solid', fgColor:{rgb:'FFFF00'}};
+  const NONE   = {patternType:'none'};
+
+  function makeSheet() {
+    const ws = {};
+    const merges = [];
+
+    function put(r, col, v, opts) {
+      opts = opts || {};
+      const ref = XLSX.utils.encode_cell({r, c: col});
+      if (v instanceof Date) {
+        ws[ref] = {v: toExcelDate(v), t:'n', z:'YY-M-D'};
+      } else if (typeof v === 'number') {
+        ws[ref] = {v, t:'n'};
+      } else {
+        ws[ref] = {v: v == null ? '' : v, t:'s'};
+      }
+      ws[ref].s = {
+        font: {name:'Arial', sz: opts.sz || 10, bold: !!opts.bold},
+        alignment: {horizontal: opts.align || 'left', vertical:'center'},
+        fill: opts.yellow ? YELLOW : NONE
+      };
+    }
+
+    function merge(r1, c1, r2, c2) {
+      merges.push({s:{r:r1, c:c1}, e:{r:r2, c:c2}});
+    }
+
+    // Row 1: PROFORMA INVOICE  A1:I1
+    put(0,0,'PROFORMA INVOICE', {bold:true, sz:14, align:'center'});
+    merge(0,0, 0,8);
+
+    // Row 2: SHIPPER A2:B2 / NO & DATE D2:F2
+    put(1,0,'SHIPPER', {bold:true, align:'center'});           merge(1,0, 1,1);
+    put(1,3,'NO & DATE OF INVOICE', {bold:true, align:'center'}); merge(1,3, 1,5);
+
+    // Row 3-5: SOLTRI 정보
+    put(2,0,'SOLTRI CORPORATION');
+    put(3,0,'133B, 1L, 704, GOJAN-DONG, NAMDONG-GU');
+    put(4,0,'INCHEON KOREA TEL : 82-32-761-2323');
+
+    // Row 6: 업체명 A6:B6 / 발주일(수정) D6:F6
+    put(5,0,'업체명', {bold:true, align:'center'});            merge(5,0, 5,1);
+    put(5,3,'발주일(수정)', {bold:true, align:'center'});      merge(5,3, 5,5);
+
+    // Row 7: 안전재고 B7 / 발주일 E7 (노란색)
+    put(6,1,'안전재고', {bold:true, align:'center'});
+    put(6,4, today, {bold:true, align:'center', yellow:true});
+
+    // Row 10: NOTIFY A10:B10 / REMARKS D10:F10
+    put(9,0,'NOTIFY', {bold:true, align:'center'});            merge(9,0, 9,1);
+    put(9,3,'REMARKS', {bold:true, align:'center'});           merge(9,3, 9,5);
+
+    // Row 12: LOADING PORT A12:B12
+    put(11,0,'LOADING PORT', {bold:true, align:'center'});     merge(11,0, 11,1);
+
+    // Row 13: DESTINATION A13:B13
+    put(12,0,'DESTINATION', {bold:true, align:'center'});      merge(12,0, 12,1);
+
+    // Row 14: VESSEL A14:B14 / 발송일자 D14:F14 / 안전재고 G14:I14 (노란색)
+    put(13,0,'VESSEL & VOY', {bold:true});                     merge(13,0, 13,1);
+    put(13,3,'발송일자', {bold:true, align:'center'});         merge(13,3, 13,5);
+    put(13,6,'안전재고 (' + dateStr + ')', {bold:true, align:'center', yellow:true}); merge(13,6, 13,8);
+
+    // Row 15: 납기일자 A15:B15 / 날짜 C15 (노란색) / ETA D15:F15
+    put(14,0,'납기일자(수정)', {bold:true});                   merge(14,0, 14,1);
+    put(14,2, future, {bold:true, align:'center', yellow:true});
+    put(14,3,'ETA', {bold:true, align:'center'});              merge(14,3, 14,5);
+
+    // Row 16: DESCRIPTION A16:I16
+    put(15,0,'DESCRIPTION : PLAIN SHAFT BEARING - HYDRAULIC SEALS', {bold:true}); merge(15,0, 15,8);
+
+    // Row 17: 헤더
+    put(16,0,'NO.',                    {align:'center'});
+    put(16,1,'품번(19번부터인식)',       {bold:true, align:'center'});
+    put(16,2,'치수',                    {bold:true, align:'center'});
+    put(16,4,'품명/재질',               {bold:true, align:'center'});
+    put(16,5,'수량',                    {bold:true, align:'center'});
+    put(16,7,'U/PRICE (USD)(발송일자)', {bold:true, align:'center'});
+    put(16,8,'AMOUNT (USD)',            {align:'center'});
+
+    // Row 19+: 데이터 (row 18 = 0-indexed 17 = 스킵, 데이터는 18부터)
+    selected.forEach((item, i) => {
+      const row = 18 + i;
+      const chisu = item.chisu.replace(/\*/g, ' x ');
+      const jaejil = 'W/' + item.jaejil;
+      const qty = Math.ceil(item.total_qty / 10) * 10;
+      put(row, 0, i + 1,  {align:'center'});
+      put(row, 2, chisu,  {align:'left'});
+      put(row, 3, 'W',    {align:'left'});
+      put(row, 4, jaejil, {align:'left'});
+      put(row, 5, qty,    {align:'right'});
+      put(row, 7, future, {bold:true, align:'center', yellow:true});
+    });
+
+    // !ref, merges
+    ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:18+selected.length, c:8}});
+    ws['!merges'] = merges;
+
+    // 열 너비 (ERP 파일 기준)
+    ws['!cols'] = [
+      {wch:4.46},  // A: NO
+      {wch:15.53}, // B: 품번
+      {wch:15.86}, // C: 치수
+      {wch:3.8},   // D: W
+      {wch:8.86},  // E: 품명/재질
+      {wch:8.86},  // F: 수량
+      {wch:1.8},   // G: 빈칸
+      {wch:12.2},  // H: U/PRICE
+      {wch:9.2},   // I: AMOUNT
+    ];
+
+    // 행 높이 (ERP 파일 기준, pt)
+    ws['!rows'] = [22.5,13.5,16.5,16.5,16.5,13.5,16.5,16.5,16.5,13.5,16.5,13.5,13.5,17.25,17.25,16.5,24.75,24.75]
+      .map(h => ({hpt:h}));
+    for (let i = 0; i < selected.length; i++) ws['!rows'].push({hpt:18});
+
+    return ws;
+  }
+
+  // ── Sheet2: 변환시트 (22열) ─────────────────────────────────
+  function makeSheet2() {
+    const ws = {};
+    const merges = [];
+
+    function p(r, col, v, opts) {
+      opts = opts || {};
+      const ref = XLSX.utils.encode_cell({r, c: col});
+      if (v instanceof Date) {
+        ws[ref] = {v: toExcelDate(v), t:'n', z:'YY-M-D'};
+      } else if (typeof v === 'number') {
+        ws[ref] = {v, t:'n'};
+      } else {
+        ws[ref] = {v: v == null ? '' : v, t:'s'};
+      }
+      ws[ref].s = {
+        font: {name:'Arial', sz: opts.sz || 10, bold: !!opts.bold},
+        alignment: {horizontal: opts.align || 'left', vertical:'center'},
+        fill: opts.yellow ? YELLOW : NONE
+      };
+    }
+    function mg(r1,c1,r2,c2){ merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
+
+    // Row 1: 라벨 출고용 A1:I1
+    p(0,0,'라벨 출고용', {bold:true, align:'center'}); mg(0,0,0,8);
+
+    // Row 2: SHIPPER A2:B2 / NO & DATE D2:F2
+    p(1,0,'SHIPPER', {bold:true, align:'center'}); mg(1,0,1,1);
+    p(1,3,'NO & DATE OF INVOICE', {bold:true, align:'center'}); mg(1,3,1,5);
+
+    // Row 3: 회사정보 + 우측 주의사항/품목표시
+    p(2,0,'SOLTRI CORPORATION');
+    p(2,4,'WPB110527-87');
+    p(2,10,'작성시 주의할점', {bold:true});
+    p(2,17,'품명표기(대문자)작업일지 선택', {bold:true});
+
+    // Row 4
+    p(3,0,'133BL-1L 704 GOJAN-DONG, NAMDONG-KU');
+    p(3,4,'DATE : MAR. 28, 2011');
+    p(3,10,'숨기기 하면 안된다');
+    p(3,17,'W'); p(3,18,'W/R  &   W/동');
+
+    // Row 5
+    p(4,0,'INCHEON KOREA TEL : 82-32-761-2323');
+    p(4,10,'제품정보는 " * "로 되어있어야 하고, 인보이스 엑셀은 "X" 또는 "x"로 되어있어야 됨');
+    p(4,17,'M'); p(4,18,'MOSTUF');
+
+    // Row 6: 업체명 A6:B6 / 발주번호 D6:F6 + 주의사항/품목표시
+    p(5,0,'업체명', {bold:true, align:'center'}); mg(5,0,5,1);
+    p(5,3,'발주일', {bold:true, align:'center'}); mg(5,3,5,5);
+    p(5,10,'가지수가 많을경우 삽입해서 해도 됨');
+    p(5,17,'S'); p(5,18,'STRIP');
+
+    // Row 7: 안전재고 A7:C7 / 발주일 D7:I7(노란색)
+    p(6,0,'안전재고', {bold:true, align:'center'}); mg(6,0,6,2);
+    p(6,3, today, {bold:true, align:'center', yellow:true}); mg(6,3,6,8);
+    p(6,10,'칸을 비워놓으면 안됨');
+
+    // Row 8
+    p(7,10,'빈칸에 0으로 나오면 지워야함');
+
+    // Row 10: NOTIFY A10:B10 / REMARKS D10:F10
+    p(9,0,'NOTIFY', {bold:true, align:'center'}); mg(9,0,9,1);
+    p(9,2,'TEL : 91-80-2839-0211');
+    p(9,3,'REMARKS', {bold:true, align:'center'}); mg(9,3,9,5);
+
+    // Row 11: SAME AS CONSIGNEE / DELIVERY TERM
+    p(10,0,'SAME AS CONSIGNEE  Mr. GopalaKrishna. M');
+    p(10,4,'DELIVERY TERM : FOB KOREA');
+
+    // Row 12: LOADING PORT A12:B12
+    p(11,0,'LOADING PORT', {bold:true, align:'center'}); mg(11,0,11,1);
+    p(11,2,'INCHEON AIRPORT, KOREA');
+    p(11,4,'PAYMENT TERM : T/T REMITTANCE');
+
+    // Row 13: DESTINATION A13:B13
+    p(12,0,'DESTINATION', {bold:true, align:'center'}); mg(12,0,12,1);
+    p(12,2,'BANGALORE, INDIA');
+    p(12,4,'SHIPPING MODE : AIR');
+
+    // Row 14: (빈칸 A14:B14) / P/O & DATE D14:F14 / 납기일 G14:I14(노란색)
+    mg(13,0,13,1);
+    p(13,3,'P/O & DATE', {bold:true, align:'center'}); mg(13,3,13,5);
+    p(13,6, future, {bold:true, align:'center', yellow:true}); mg(13,6,13,8);
+
+    // Row 15: (빈칸 A15:B15) / ETA D15:F15
+    mg(14,0,14,1);
+    p(14,3,'ETA', {bold:true, align:'center'}); mg(14,3,14,5);
+
+    // Row 17: 안내 K17:U17
+    p(16,10,'각업체별로 붙여넣기한다( 하늘색은 참고용임) 재질별로 정열한다'); mg(16,10,16,20);
+
+    // Row 18: 헤더 (22열)
+    const h2 = ['NO.','품번(19번부터인식)','치수','품명표기(대문자)작업일지 선택','품명/재질','수량','','납기일','비고','','업체명','품번','재질','치수','','UNIT',"TOTAL Q'TY",'납기일','P.O','','비고',''];
+    h2.forEach((v, c) => { if (v) p(17, c, v, {bold:true, align:'center'}); });
+
+    // Row 19+: 데이터
+    selected.forEach((item, i) => {
+      const row = 18 + i;
+      const chisu = item.chisu.replace(/\*/g, ' x ');
+      const jaejil = 'W/' + item.jaejil;
+      const qty = item.total_qty;
+      p(row, 0,  i + 1,        {align:'center'});
+      p(row, 1,  '',            {});
+      p(row, 2,  chisu,         {align:'left'});
+      p(row, 3,  'W',           {align:'left'});
+      p(row, 4,  jaejil,        {align:'left'});
+      p(row, 5,  qty,           {align:'right'});
+      p(row, 7,  future,        {align:'center', yellow:true});
+      p(row, 8,  '',            {});
+      p(row, 10, '안전재고',    {align:'left'});
+      p(row, 11, '',            {});
+      p(row, 12, jaejil,        {align:'left'});
+      p(row, 13, chisu,         {align:'left'});
+      p(row, 15, 'PCS',         {align:'center'});
+      p(row, 16, qty,           {align:'right'});
+      p(row, 17, future,        {align:'center', yellow:true});
+      p(row, 18, '',            {});
+    });
+
+    ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:18+selected.length, c:21}});
+    ws['!merges'] = merges;
+    ws['!cols'] = [
+      {wch:5},{wch:15},{wch:14},{wch:10},{wch:12},{wch:7},{wch:2},{wch:11},{wch:8},{wch:2},
+      {wch:12},{wch:15},{wch:12},{wch:14},{wch:2},{wch:6},{wch:10},{wch:11},{wch:18},{wch:2},{wch:10},{wch:2}
+    ];
+    return ws;
+  }
+
+  // ── Sheet3: 참고값 (재질코드 조회) ──────────────────────────
+  function makeSheet3() {
+    const ws = {};
+    function p(r, c, v, bold) {
+      const ref = XLSX.utils.encode_cell({r, c});
+      ws[ref] = {v: v == null ? '' : v, t: typeof v === 'number' ? 'n' : 's'};
+      if (bold) ws[ref].s = {font:{name:'Arial', sz:10, bold:true}};
+    }
+
+    p(0,0,'품명표기 (자동)',         true);
+    p(0,1,'품명/재질 입력(Key-in)', true);
+    p(0,3,'재질',                   true);
+    p(0,4,'출력',                   true);
+
+    p(1,0,'변환시트의 D19에 자동입력'); p(1,3,'W/RS40');  p(1,4,'W');
+    p(2,3,'W/CN10');  p(2,4,'W');
+    p(3,3,'W/CN20');  p(3,4,'W');
+    p(4,3,'W/CM20');  p(4,4,'W');
+    p(5,3,'W/CN10(C=4.5)'); p(5,4,'W');
+    p(6,3,'W/RS40(C=5.5)'); p(6,4,'W');
+    p(7,3,'B/RS40');  p(7,4,'B');
+    p(8,3,'B/CN10');  p(8,4,'B');
+    p(9,3,'B/CN20');  p(9,4,'B');
+    p(10,3,'B/CM20'); p(10,4,'B');
+    p(11,3,'Mostuf P');  p(11,4,'M');
+    p(12,3,'Mostuf NW'); p(12,4,'M');
+    p(13,3,'M/W');    p(13,4,'M');
+    p(15,0,'키워드 추가 가능');
+
+    ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:15,c:4}});
+    ws['!cols'] = [{wch:20},{wch:20},{wch:2},{wch:16},{wch:6}];
+    return ws;
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, makeSheet(),  'Sheet1');
+  XLSX.utils.book_append_sheet(wb, makeSheet2(), '변환시트');
+  XLSX.utils.book_append_sheet(wb, makeSheet3(), '정의값');
+
+  XLSX.writeFile(wb, 'ERP 발주저장 양식(' + dateStr + ').xlsx');
+  showToast(selected.length + '개 품목 엑셀 다운로드 완료');
+}
+
+function toggleSection(name) {
+  const map = { active: 'gridActive', grave: 'gridGrave', completed: 'gridCompleted', stocked: 'gridStocked', prod: 'gridProd' };
+  const toggleMap = { active: 'toggleActive', grave: 'toggleGrave', completed: 'toggleCompleted', stocked: 'toggleStocked', prod: 'toggleProd' };
+  const grid = document.getElementById(map[name]);
+  const toggle = document.getElementById(toggleMap[name]);
+  if (grid.style.display === 'none') {
+    grid.style.display = '';
+    toggle.textContent = '▼';
+  } else {
+    grid.style.display = 'none';
+    toggle.textContent = '▶';
+  }
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1500);
+}
+
+// 주문이력 모달
+let historyCache = null;
+const HISTORY_TAB = encodeURIComponent('주문이력');
+
+function showHistory(key, chisu, jaejil) {
+  document.getElementById('modalTitle').textContent = chisu + ' / ' + jaejil + ' 주문이력';
+  document.getElementById('modalBody').innerHTML = '<div class="modal-loading">로딩중...</div>';
+  document.getElementById('modalBg').classList.add('show');
+
+  if (historyCache) {
+    renderHistory(key, chisu, jaejil);
+    return;
+  }
+
+  const cbName = '_histCb_' + Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0/gviz/tq?sheet=${HISTORY_TAB}&tqx=responseHandler:${cbName}`;
+
+  window[cbName] = function(response) {
+    try {
+      historyCache = [];
+      for (const row of response.table.rows) {
+        const c = row.c;
+        if (!c || !c[0]) continue;
+        const v = (i) => c[i] ? (c[i].v != null ? c[i].v : '') : '';
+        historyCache.push({ chisu: String(v(0)), jaejil: String(v(1)), date: String(v(2)), customer: String(v(3)), qty: parseInt(v(4)) || 0, type: String(v(5)) || '주문' });
+      }
+      renderHistory(key, chisu, jaejil);
+    } catch(e) {
+      document.getElementById('modalBody').innerHTML = '<div class="modal-loading">이력 로드 실패</div>';
+    }
+    delete window[cbName];
+    document.body.removeChild(script);
+  };
+  const script = document.createElement('script');
+  script.src = url;
+  script.onerror = function() { document.getElementById('modalBody').innerHTML = '<div class="modal-loading">이력 로드 실패</div>'; delete window[cbName]; };
+  document.body.appendChild(script);
+}
+
+function renderHistory(key, chisu, jaejil) {
+  const rows = historyCache.filter(h => h.chisu === chisu && h.jaejil === jaejil);
+  rows.sort((a, b) => b.date.localeCompare(a.date));
+
+  if (rows.length === 0) {
+    document.getElementById('modalBody').innerHTML = '<div class="modal-loading">이력 없음</div>';
+    return;
+  }
+
+  let total = 0;
+  let html = '<table class="history-table"><thead><tr><th>주문일자</th><th>거래처</th><th>수량</th><th>구분</th></tr></thead><tbody>';
+  for (const r of rows) {
+    total += r.qty;
+    const isBalju = r.type === '발주';
+    const rowStyle = isBalju ? 'color:#fca5a5;background:#2a1215' : '';
+    const badge = isBalju ? '<span style="background:#dc2626;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">발주</span>' : '<span style="color:#64748b;font-size:10px">주문</span>';
+    html += `<tr style="${rowStyle}"><td>${r.date}</td><td>${r.customer}</td><td class="qty">${r.qty}개</td><td style="text-align:center">${badge}</td></tr>`;
+  }
+  html += `</tbody><tfoot><tr><td colspan="2" style="text-align:right;color:#94a3b8;padding:8px 12px"><strong>${rows.length}건</strong></td><td class="qty" style="border-top:2px solid #3b82f6">${total}개</td><td></td></tr></tfoot></table>`;
+  document.getElementById('modalBody').innerHTML = html;
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modalBg').classList.remove('show');
+}
+
+// 타임라인 점 그리기
+function renderTimelines() {
+  if (!historyCache) return;
+  // 100일 고정 스케일 (왼쪽=100일전, 오른쪽=오늘)
+  const today = new Date();
+  const day100ago = new Date(today); day100ago.setDate(day100ago.getDate() - 100);
+  const range = today - day100ago;
+  const recent7 = new Date(today); recent7.setDate(recent7.getDate() - 7);
+
+  for (const r of ITEMS) {
+    const tlId = 'tl-' + r.key.replace(/[*|.]/g, '_');
+    const el = document.getElementById(tlId);
+    if (!el) continue;
+    const orders = historyCache.filter(h => h.chisu === r.chisu && h.jaejil === r.jaejil);
+    if (!orders.length) { el.style.display = 'none'; continue; }
+    let dots = '';
+    for (const o of orders) {
+      const d = new Date(o.date);
+      if (d < day100ago) continue;
+      const pct = ((d - day100ago) / range * 94 + 3).toFixed(1);
+      const cls = o.type === '발주' ? 'dot balju' : d >= recent7 ? 'dot recent' : 'dot';
+      dots += `<div class="${cls}" style="left:${pct}%" title="${o.date} ${o.customer} ${o.qty}개 ${o.type||''}"></div>`;
+    }
+    el.innerHTML = dots;
+  }
+}
+
+// 페이지 로드시 이력도 함께 가져와서 타임라인 렌더링
+function loadHistory() {
+  const cbName = '_histBg_' + Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${HISTORY_TAB}&tqx=responseHandler:${cbName}`;
+  window[cbName] = function(response) {
+    try {
+      historyCache = [];
+      for (const row of response.table.rows) {
+        const c = row.c;
+        if (!c || !c[0]) continue;
+        const v = (i) => c[i] ? (c[i].v != null ? c[i].v : '') : '';
+        historyCache.push({ chisu: String(v(0)), jaejil: String(v(1)), date: String(v(2)), customer: String(v(3)), qty: parseInt(v(4)) || 0, type: String(v(5)) || '주문' });
+      }
+      renderTimelines();
+    } catch(e) { console.error('이력 로드 실패:', e); }
+    delete window[cbName];
+    document.body.removeChild(script);
+  };
+  const script = document.createElement('script');
+  script.src = url;
+  script.onerror = function() { delete window[cbName]; };
+  document.body.appendChild(script);
+}
+
+// Google Sheets JSONP 로드 (file://에서도 동작 - script 태그 방식)
+const SHEET_ID = '1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0';
+const SHEET_TAB = encodeURIComponent('선생산리스트');
+
+function loadFromSheet(callback) {
+  const cbName = '_sheetCb_' + Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_TAB}&tqx=responseHandler:${cbName}`;
+
+  window[cbName] = function(response) {
+    try {
+      const rows = response.table.rows;
+      const items = [];
+      for (const row of rows) {
+        const c = row.c;
+        if (!c || !c[0]) continue;
+        const v = (i) => c[i] ? (c[i].v != null ? c[i].v : '') : '';
+        items.push({
+          chisu: String(v(0)), jaejil: String(v(1)), pumok: String(v(2)),
+          freq: parseInt(v(3)) || 0,
+          total_qty: parseInt(v(4)) || 0,
+          avg_qty: parseFloat(v(5)) || 0,
+          stock: parseInt(v(6)) || 0,
+          stock_ratio: parseInt(v(6)) >= 0 && parseInt(v(4)) > 0 ? Math.round(parseInt(v(6)) / parseInt(v(4)) * 1000) / 10 : parseFloat(v(7)) || 0,
+          in_production: v(8) === 'Y',
+          score: parseFloat(v(9)) || 0,
+          customers: v(10) ? String(v(10)).split(', ').map(n => ({name:n})) : [],
+          latest_balju: String(v(11)),
+          key: String(v(0)) + '|' + String(v(1))
+        });
+      }
+      callback(items);
+    } catch(e) {
+      console.error('파싱 실패:', e);
+      callback(null);
+    }
+    // 정리
+    delete window[cbName];
+    document.body.removeChild(script);
+  };
+
+  const script = document.createElement('script');
+  script.src = url;
+  script.onerror = function() { callback(null); delete window[cbName]; };
+  document.body.appendChild(script);
+}
+
+loadGraveyardFromSheet(function() {
+  loadFromSheet(function(items) {
+    if (items) {
+      ITEMS = items;
+      autoRemoveGraveyard();
+      autoCleanCompleted();
+      render();
+      loadHistory();
+    } else {
+      document.body.innerHTML += '<div style="color:red;padding:40px;font-size:18px">데이터 로드 실패 - 인터넷 연결을 확인하세요</div>';
+    }
+  });
+});
+</script>
+</body>
+</html>

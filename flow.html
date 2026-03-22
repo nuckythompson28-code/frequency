@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>선생산 관리 - 일련의 과정</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic',sans-serif;background:#07101f;color:#e2e8f0;padding:40px 24px;min-height:100vh}
+h1{text-align:center;font-size:22px;font-weight:900;color:#f8fafc;margin-bottom:6px}
+.sub{text-align:center;font-size:11px;color:#475569;margin-bottom:48px}
+
+.flow{display:flex;flex-direction:column;align-items:center;gap:0}
+
+/* 단계 */
+.step{display:flex;align-items:flex-start;gap:20px;width:100%;max-width:780px;margin-bottom:0}
+.step-left{display:flex;flex-direction:column;align-items:center;width:56px;flex-shrink:0}
+.step-num{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0}
+.step-line{width:2px;flex:1;min-height:24px}
+
+.step-body{flex:1;background:#0d1f38;border:1.5px solid #1e3a5f;border-radius:14px;padding:18px 22px;margin-bottom:24px}
+.step-body.orange{background:#1a1200;border-color:#78350f}
+.step-body.green{background:#071a0f;border-color:#14532d}
+.step-body.purple{background:#130d1f;border-color:#4c1d95}
+.step-body.teal{background:#071a1a;border-color:#134e4a}
+.step-body.red{background:#1a0707;border-color:#7f1d1d}
+
+.step-tag{display:inline-block;font-size:9px;font-weight:800;padding:2px 9px;border-radius:20px;margin-bottom:8px;letter-spacing:.5px}
+.step-title{font-size:14px;font-weight:900;margin-bottom:6px}
+.step-desc{font-size:11px;color:#64748b;line-height:1.9}
+.step-desc b{font-weight:700}
+
+/* 색상별 */
+.blue .step-num{background:#1e3a8a;color:#93c5fd;border:2px solid #3b82f6}
+.blue .step-line{background:linear-gradient(to bottom,#3b82f6,#1e3a8a)}
+.blue .step-tag{background:#1e3a8a;color:#93c5fd}
+.blue .step-title{color:#60a5fa}
+
+.orange .step-num{background:#78350f;color:#fde68a;border:2px solid #f59e0b}
+.orange .step-line{background:linear-gradient(to bottom,#f59e0b,#78350f)}
+.orange .step-tag{background:#78350f;color:#fde68a}
+.orange .step-title{color:#fbbf24}
+
+.green .step-num{background:#14532d;color:#86efac;border:2px solid #22c55e}
+.green .step-line{background:linear-gradient(to bottom,#22c55e,#14532d)}
+.green .step-tag{background:#14532d;color:#86efac}
+.green .step-title{color:#4ade80}
+
+.purple .step-num{background:#4c1d95;color:#c4b5fd;border:2px solid #8b5cf6}
+.purple .step-line{background:linear-gradient(to bottom,#8b5cf6,#4c1d95)}
+.purple .step-tag{background:#4c1d95;color:#c4b5fd}
+.purple .step-title{color:#a78bfa}
+
+.teal .step-num{background:#134e4a;color:#99f6e4;border:2px solid #14b8a6}
+.teal .step-line{background:linear-gradient(to bottom,#14b8a6,#134e4a)}
+.teal .step-tag{background:#134e4a;color:#99f6e4}
+.teal .step-title{color:#2dd4bf}
+
+.red .step-num{background:#7f1d1d;color:#fca5a5;border:2px solid #ef4444}
+.red .step-line{background:linear-gradient(to bottom,#ef4444,#7f1d1d)}
+.red .step-tag{background:#7f1d1d;color:#fca5a5}
+.red .step-title{color:#f87171}
+
+/* 서브아이템 */
+.sub-items{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sub-item{background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:7px 12px;font-size:10px;color:#94a3b8;line-height:1.6}
+.sub-item b{display:block;font-size:10px;font-weight:700;color:#cbd5e1;margin-bottom:2px}
+
+/* 분기 박스 */
+.branch{width:100%;max-width:780px;margin:0 0 24px 76px;display:flex;gap:12px}
+.branch-box{flex:1;border-radius:12px;padding:14px 16px;font-size:10px;line-height:1.8;color:#94a3b8}
+.branch-box b{display:block;font-size:11px;font-weight:800;margin-bottom:6px}
+.branch-box.yes{background:#071a0f;border:1.5px solid #14532d}
+.branch-box.yes b{color:#4ade80}
+.branch-box.no{background:#1a0707;border:1.5px solid #7f1d1d}
+.branch-box.no b{color:#f87171}
+.branch-box.auto{background:#130d1f;border:1.5px solid #4c1d95}
+.branch-box.auto b{color:#a78bfa}
+
+/* 화살표 */
+.arrow{font-size:18px;color:#334155;margin:2px 0;text-align:center;width:56px}
+
+/* 최종 */
+.finale{width:100%;max-width:780px;margin-left:76px;background:#0d1a10;border:2px solid #16a34a;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px}
+.finale .icon{font-size:32px}
+.finale .txt b{display:block;font-size:13px;font-weight:900;color:#4ade80;margin-bottom:4px}
+.finale .txt span{font-size:11px;color:#4b7c5a}
+</style>
+</head>
+<body>
+
+<h1>선생산 관리 — 일련의 과정</h1>
+<div class="sub">Soltri 쏠트리 · ERP → 분석 → 생산지시 → 자동 완료</div>
+
+<div class="flow">
+
+  <!-- STEP 1 -->
+  <div class="step orange">
+    <div class="step-left">
+      <div class="step-num">1</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body orange">
+      <div class="step-tag">ERP</div>
+      <div class="step-title">ERP에서 엑셀 다운로드</div>
+      <div class="step-desc">매일 아침 ERP 시스템에서 최신 데이터를 수동으로 다운받습니다.</div>
+      <div class="sub-items">
+        <div class="sub-item"><b>라벨조회.xlsx</b>주문 이력 전체 (거래처·치수·수량)</div>
+        <div class="sub-item"><b>완제품재고창고.xlsx</b>현재 창고 재고 현황</div>
+        <div class="sub-item"><b>가공작업조회.xlsx</b>최근 7일 생산 이력</div>
+        <div class="sub-item"><b>발주조회.xlsx</b>안전재고 발주 이력</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step blue">
+    <div class="step-left">
+      <div class="step-num">2</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">BAT</div>
+      <div class="step-title">start.bat 실행</div>
+      <div class="step-desc">
+        배치파일 더블클릭 한 번으로 전체 프로세스가 자동 시작됩니다.<br>
+        <b>① refresh.py 실행</b> → <b>② 대시보드(index.html) 자동 오픈</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step teal">
+    <div class="step-left">
+      <div class="step-num">3</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body teal">
+      <div class="step-tag">PYTHON</div>
+      <div class="step-title">refresh.py — 데이터 분석 및 업로드</div>
+      <div class="step-desc">엑셀 4개를 읽어 분석하고 결과를 구글시트에 업로드합니다.</div>
+      <div class="sub-items">
+        <div class="sub-item"><b>주문 빈도 분석</b>3회 이상 · 총수량 1000 이하</div>
+        <div class="sub-item"><b>현재고 매핑</b>재고율(%) 계산</div>
+        <div class="sub-item"><b>생산이력 확인</b>최근 7일 생산 중 여부</div>
+        <div class="sub-item"><b>발주조회 매칭</b>안전재고 발주일 추출</div>
+        <div class="sub-item"><b>점수 산정</b>빈도점수 + 긴급도</div>
+        <div class="sub-item"><b>구글시트 업로드</b>선생산리스트 + 주문이력</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step green">
+    <div class="step-left">
+      <div class="step-num">4</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body green">
+      <div class="step-tag">DASHBOARD</div>
+      <div class="step-title">index.html — 대시보드 로드</div>
+      <div class="step-desc">
+        구글시트에서 최신 데이터를 JSONP로 불러옵니다.<br>
+        동시에 Apps Script에서 <b>생산지시 중 / 생산지시 완료</b> 목록도 로드합니다.
+      </div>
+      <div class="sub-items">
+        <div class="sub-item"><b>구글시트 (선생산리스트)</b>JSONP → data 로드</div>
+        <div class="sub-item"><b>Apps Script (무덤탭)</b>생산지시 중·완료 상태 복원</div>
+        <div class="sub-item"><b>autoRemoveGraveyard()</b>발주 확인된 항목 자동 이동</div>
+        <div class="sub-item"><b>autoCleanCompleted()</b>재고 충족 항목 자동 제거</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 분기 -->
+  <div class="step purple">
+    <div class="step-left">
+      <div class="step-num">5</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body purple">
+      <div class="step-tag">AUTO</div>
+      <div class="step-title">자동 상태 판단 (로드 시 매회 실행)</div>
+      <div class="step-desc">
+        <b>생산지시 중</b> 항목의 <b>latest_balju</b>(최근 발주일)가 생산지시 날짜 이상이면 → <b>생산지시 완료</b>로 자동 이동<br>
+        <b>생산지시 완료</b> 항목의 재고율이 필터 기준 초과 → <b>완전 제거</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="branch">
+    <div class="branch-box yes">
+      <b>✅ 발주 확인됨</b>
+      latest_balju ≥ 생산지시 날짜<br>
+      → <b>생산지시 중</b> 에서<br>
+      → <b>생산지시 완료</b> 로 이동<br>
+      (Apps Script 자동 저장)
+    </div>
+    <div class="branch-box auto">
+      <b>🔄 재고 충족</b>
+      재고율 > 필터 슬라이더값<br>
+      → <b>생산지시 완료</b> 에서<br>
+      → <b>완전 제거</b><br>
+      (목록에서 사라짐)
+    </div>
+    <div class="branch-box no">
+      <b>⏳ 대기 중</b>
+      발주 미확인 또는<br>재고 미충족 상태<br>
+      → 현재 섹션 유지<br>
+      (다음 refresh까지 대기)
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step blue">
+    <div class="step-left">
+      <div class="step-num">6</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">USER</div>
+      <div class="step-title">사용자 — 생산지시 중 등록</div>
+      <div class="step-desc">
+        <b>선생산 필요</b> 카드에서 <b>생산지시 중</b> 버튼 클릭<br>
+        → 해당 날짜가 Apps Script(구글시트 무덤탭)에 저장됨<br>
+        → ERP에 <b>안전재고</b> 발주 등록 후 발주조회 엑셀 다운로드 대기
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- FINALE -->
+  <div class="finale">
+    <div class="icon">🔁</div>
+    <div class="txt">
+      <b>다음날 — 다시 start.bat 실행</b>
+      <span>엑셀 갱신 → refresh.py → 구글시트 업데이트 → 대시보드 자동 상태 반영</span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

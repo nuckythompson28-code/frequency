@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>선생산 시스템 구조도</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic',sans-serif;background:#060d1a;color:#e2e8f0;padding:32px 24px;min-height:100vh}
+h1{text-align:center;font-size:20px;font-weight:900;color:#f8fafc;margin-bottom:4px}
+.sub{text-align:center;font-size:11px;color:#334155;margin-bottom:40px}
+
+/* 노드 */
+.node{border-radius:12px;padding:14px 18px;position:relative}
+.node .icon{font-size:26px;margin-bottom:6px;display:block}
+.node .title{font-size:12px;font-weight:900;margin-bottom:4px}
+.node .desc{font-size:10px;color:#475569;line-height:1.8}
+.tag{display:inline-block;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;margin-bottom:6px}
+
+.nd-pc{background:#0f1f3d;border:1.5px solid #2563eb;width:180px}
+.nd-pc .title{color:#60a5fa}
+.nd-pc .tag{background:#1e3a8a;color:#93c5fd}
+
+.nd-gs{background:#0f2d1f;border:1.5px solid #16a34a;width:200px}
+.nd-gs .title{color:#4ade80}
+.nd-gs .tag{background:#14532d;color:#86efac}
+
+.nd-erp{background:#1f1207;border:1.5px solid #d97706;width:170px}
+.nd-erp .title{color:#fbbf24}
+.nd-erp .tag{background:#78350f;color:#fde68a}
+
+.nd-as{background:#1a0a2e;border:1.5px solid #7c3aed;width:180px}
+.nd-as .title{color:#a78bfa}
+.nd-as .tag{background:#3b0764;color:#c4b5fd}
+
+.nd-html{background:#1e1207;border:1.5px solid #ea580c;width:170px}
+.nd-html .title{color:#fb923c}
+.nd-html .tag{background:#7c2d12;color:#fdba74}
+
+/* 파일 리스트 */
+.flist{margin-top:8px}
+.fi{display:flex;align-items:center;gap:6px;font-size:10px;color:#64748b;padding:2px 0}
+.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dg{background:#4ade80}.db{background:#60a5fa}.dy{background:#fbbf24}.dp{background:#a78bfa}.do{background:#fb923c}.dr{background:#f87171}
+
+/* 레이아웃 */
+.diagram{max-width:960px;margin:0 auto;position:relative}
+
+/* 행 */
+.row{display:flex;justify-content:center;align-items:flex-start;gap:16px;margin-bottom:0}
+.col{display:flex;flex-direction:column;align-items:center;gap:0}
+
+/* SVG 화살표 컨테이너 */
+.arr{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.arr-lbl{font-size:9px;color:#334155;text-align:center;white-space:nowrap;line-height:1.5}
+
+/* 설명 박스 */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:960px;margin:32px auto 0}
+.info-box{background:#0d1117;border:1px solid #1e293b;border-radius:12px;padding:16px}
+.info-box h3{font-size:12px;font-weight:800;margin-bottom:10px}
+.ib-blue h3{color:#60a5fa}.ib-green h3{color:#4ade80}.ib-purple h3{color:#a78bfa}.ib-orange h3{color:#fb923c}
+.ir{display:flex;gap:8px;font-size:11px;color:#64748b;line-height:1.7;margin-bottom:4px}
+.ir strong{color:#94a3b8}
+
+/* 플로우 */
+.flow{max-width:960px;margin:24px auto 0;background:#0d1117;border:1px solid #1e293b;border-radius:12px;padding:20px 24px}
+.flow h3{font-size:12px;font-weight:800;color:#94a3b8;margin-bottom:14px}
+.flow-steps{display:flex;align-items:center;flex-wrap:wrap;gap:0}
+.fs{display:flex;align-items:center}
+.fs-box{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;font-size:11px;color:#94a3b8;white-space:nowrap}
+.fs-box strong{display:block;font-size:10px;margin-bottom:2px}
+.fs-arr{color:#334155;padding:0 8px;font-size:16px}
+.fs-box.hi{border-color:#2563eb;color:#60a5fa}
+.fs-box.hi strong{color:#93c5fd}
+.fs-box.hg{border-color:#16a34a;color:#4ade80}
+.fs-box.hg strong{color:#86efac}
+.fs-box.hp{border-color:#7c3aed;color:#a78bfa}
+.fs-box.hp strong{color:#c4b5fd}
+</style>
+</head>
+<body>
+<h1>선생산 관리 시스템 — 구조도</h1>
+<div class="sub">서버 없음 · 구글시트 연동 · Apps Script 무덤 공유</div>
+
+<div class="diagram">
+
+<!-- ① ERP + refresh.py + Google Sheets -->
+<div class="row" style="align-items:center;gap:0;margin-bottom:8px">
+
+  <!-- ERP -->
+  <div class="node nd-erp">
+    <span class="tag">데이터 원본</span>
+    <span class="icon">📊</span>
+    <div class="title">ERP 엑셀</div>
+    <div class="flist">
+      <div class="fi"><span class="dot dy"></span>라벨조회.xlsx</div>
+      <div class="fi"><span class="dot dy"></span>완제품재고창고.xlsx</div>
+      <div class="fi"><span class="dot dy"></span>가공작업조회.xlsx</div>
+      <div class="fi"><span class="dot dy"></span>발주조회.xlsx</div>
+    </div>
+  </div>
+
+  <!-- ERP → PC -->
+  <div class="arr" style="width:80px">
+    <div class="arr-lbl">읽기</div>
+    <svg width="60" height="20"><defs><marker id="a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#d97706"/></marker></defs><line x1="4" y1="10" x2="54" y2="10" stroke="#d97706" stroke-width="1.5" marker-end="url(#a1)"/></svg>
+    <div class="arr-lbl" style="color:#78350f;font-size:8px">start.bat 실행시</div>
+  </div>
+
+  <!-- PC (refresh.py) -->
+  <div class="node nd-pc">
+    <span class="tag">내 PC</span>
+    <span class="icon">🖥️</span>
+    <div class="title">refresh.py</div>
+    <div class="flist">
+      <div class="fi"><span class="dot db"></span>분석 + 점수 계산</div>
+      <div class="fi"><span class="dot db"></span>발주조회 매칭</div>
+    </div>
+  </div>
+
+  <!-- PC → Google Sheets -->
+  <div class="arr" style="width:80px">
+    <div class="arr-lbl">업로드</div>
+    <svg width="60" height="20"><defs><marker id="a2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#16a34a"/></marker></defs><line x1="4" y1="10" x2="54" y2="10" stroke="#16a34a" stroke-width="1.5" marker-end="url(#a2)"/></svg>
+    <div class="arr-lbl" style="color:#14532d;font-size:8px">gspread</div>
+  </div>
+
+  <!-- Google Sheets -->
+  <div class="node nd-gs">
+    <span class="tag">구글시트</span>
+    <span class="icon">📋</span>
+    <div class="title">Google Sheets</div>
+    <div class="flist">
+      <div class="fi"><span class="dot dg"></span>선생산리스트 탭</div>
+      <div class="fi"><span class="dot dg"></span>주문이력 탭</div>
+      <div class="fi"><span class="dot dp"></span>무덤 탭 ← Apps Script</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 중간 화살표: Google Sheets ↔ index.html / Apps Script -->
+<div style="display:flex;justify-content:flex-end;margin-right:0;max-width:960px;margin:0 auto">
+  <div style="width:200px;display:flex;flex-direction:column;align-items:center">
+    <svg width="200" height="60">
+      <defs>
+        <marker id="a3d" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ea580c"/></marker>
+        <marker id="a3u" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto"><path d="M6,0 L0,3 L6,6 Z" fill="#7c3aed"/></marker>
+      </defs>
+      <!-- 왼쪽: Sheets → index.html -->
+      <line x1="60" y1="4" x2="60" y2="56" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a3d)"/>
+      <text x="30" y="34" fill="#ea580c" font-size="9" text-anchor="middle">JSONP</text>
+      <text x="30" y="45" fill="#7c2d12" font-size="8" text-anchor="middle">읽기</text>
+      <!-- 오른쪽: Apps Script ↕ -->
+      <line x1="140" y1="4" x2="140" y2="56" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a3d)"/>
+      <line x1="155" y1="56" x2="155" y2="4" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a3u)"/>
+      <text x="170" y="34" fill="#a78bfa" font-size="9" text-anchor="middle">읽기</text>
+      <text x="170" y="45" fill="#3b0764" font-size="8" text-anchor="middle">쓰기</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ② index.html + Apps Script -->
+<div class="row" style="gap:16px;justify-content:flex-end;margin-top:0">
+
+  <!-- index.html -->
+  <div class="node nd-html" style="margin-right:16px">
+    <span class="tag">대시보드</span>
+    <span class="icon">🌐</span>
+    <div class="title">index.html</div>
+    <div class="desc">더블클릭으로 열기</div>
+    <div class="flist">
+      <div class="fi"><span class="dot do"></span>선생산 리스트</div>
+      <div class="fi"><span class="dot do"></span>생산지시 중</div>
+      <div class="fi"><span class="dot do"></span>생산지시 완료</div>
+      <div class="fi"><span class="dot do"></span>엑셀 출력 (Sheet1,2,3)</div>
+    </div>
+  </div>
+
+  <!-- Apps Script -->
+  <div class="node nd-as">
+    <span class="tag">Apps Script 웹앱</span>
+    <span class="icon">⚡</span>
+    <div class="title">무덤 동기화</div>
+    <div class="desc">구글 서버에서 실행</div>
+    <div class="flist">
+      <div class="fi"><span class="dot dp"></span>GET: 무덤 데이터 읽기</div>
+      <div class="fi"><span class="dot dp"></span>GET: 무덤 데이터 저장</div>
+      <div class="fi"><span class="dot dp"></span>모든 기기 공유 가능</div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /diagram -->
+
+<!-- 플로우 -->
+<div class="flow">
+  <h3>📌 실제 사용 흐름</h3>
+  <div class="flow-steps">
+    <div class="fs"><div class="fs-box hi"><strong>① ERP</strong>엑셀 다운로드</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hi"><strong>② start.bat</strong>더블클릭</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hg"><strong>③ refresh.py</strong>분석 + 시트 업로드</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box"><strong>④ index.html</strong>자동으로 열림</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box"><strong>⑤ 카드 클릭</strong>생산지시 중</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hp"><strong>⑥ Apps Script</strong>무덤 탭에 저장</div></div>
+  </div>
+  <div class="flow-steps" style="margin-top:12px">
+    <div class="fs"><div class="fs-box"><strong>⑦ ERP 발주</strong>안전재고 등록</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hi"><strong>⑧ 발주조회.xlsx</strong>다운로드</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hi"><strong>⑨ start.bat</strong>재실행</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hg"><strong>⑩ refresh.py</strong>날짜 매칭</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hp"><strong>⑪ 자동 이동</strong>생산지시 완료</div><div class="fs-arr">→</div></div>
+    <div class="fs"><div class="fs-box hg"><strong>⑫ 재고 상승</strong>완료 목록 제거</div></div>
+  </div>
+</div>
+
+<!-- 설명 -->
+<div class="info-grid">
+  <div class="info-box ib-blue">
+    <h3>🖥️ 내 PC에서 하는 것</h3>
+    <div class="ir">▸ <span>start.bat 더블클릭 → ERP 갱신 + 대시보드 열기</span></div>
+    <div class="ir">▸ <span>index.html 더블클릭 → 그냥 보기만 할 때</span></div>
+    <div class="ir" style="color:#f87171">⚠ <span>서버 실행 불필요</span></div>
+  </div>
+  <div class="info-box ib-green">
+    <h3>📋 구글시트에 저장되는 것</h3>
+    <div class="ir">▸ <span><strong>선생산리스트 탭</strong> — 분석 결과 (refresh.py가 씀)</span></div>
+    <div class="ir">▸ <span><strong>주문이력 탭</strong> — 주문/발주 이력 (refresh.py가 씀)</span></div>
+    <div class="ir">▸ <span><strong>무덤 탭</strong> — 생산지시 중/완료 (Apps Script가 씀)</span></div>
+  </div>
+  <div class="info-box ib-purple">
+    <h3>⚡ Apps Script 역할</h3>
+    <div class="ir">▸ <span>무덤 데이터를 구글 서버에서 읽고 씀</span></div>
+    <div class="ir">▸ <span>JSONP 방식 → 서버 없이 파일에서 직접 호출 가능</span></div>
+    <div class="ir">▸ <span>다른 기기에서도 같은 무덤 상태 공유</span></div>
+  </div>
+  <div class="info-box ib-orange">
+    <h3>🌐 index.html 동작</h3>
+    <div class="ir">▸ <span>열리면 Apps Script에서 무덤 로드</span></div>
+    <div class="ir">▸ <span>구글시트에서 선생산 데이터 로드 (JSONP)</span></div>
+    <div class="ir">▸ <span>카드 클릭 → 즉시 Apps Script에 저장</span></div>
+    <div class="ir">▸ <span>로컬 캐시(localStorage)도 병행 저장</span></div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:32px;font-size:11px;color:#1e293b">Soltri 선생산 관리 시스템 · 2026</div>
+</body>
+</html>
