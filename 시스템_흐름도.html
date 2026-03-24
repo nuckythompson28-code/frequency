@@ -3,531 +3,465 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Soltri 선생산 시스템 흐름도</title>
+<title>선생산 시스템 흐름도</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:32px 20px}
-.container{max-width:1100px;margin:0 auto}
-h1{text-align:center;font-size:1.8rem;margin-bottom:4px;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.subtitle{text-align:center;color:#64748b;font-size:.85rem;margin-bottom:40px}
+body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0a0e1a;color:#e2e8f0;min-height:100vh;padding:24px 24px 80px}
+h1{text-align:center;font-size:26px;margin-bottom:6px;color:#f8fafc}
+h1 em{font-style:normal;color:#3b82f6}
+.subtitle{text-align:center;font-size:13px;color:#64748b;margin-bottom:40px}
 
-/* ══ Section ══ */
-.sec{margin-bottom:48px}
-.sec-title{font-size:1.15rem;font-weight:700;margin-bottom:20px;padding-left:14px;border-left:4px solid #818cf8;display:flex;align-items:center;gap:10px}
-.sec-title .num{background:#818cf8;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
+/* ── 비유 설명 ── */
+.analogy{background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid #334155;border-radius:16px;padding:28px 32px;margin-bottom:48px;max-width:900px;margin-left:auto;margin-right:auto}
+.analogy h2{font-size:18px;color:#fbbf24;margin-bottom:16px;text-align:center}
+.analogy-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.analogy-item{text-align:center;padding:12px 8px;border-radius:12px;background:#0f172a;border:1px solid #334155}
+.analogy-item .emoji{font-size:36px;margin-bottom:6px}
+.analogy-item .a-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.analogy-item .a-desc{font-size:10px;color:#94a3b8;line-height:1.5}
+.analogy-item.c1{border-color:#ef4444}.analogy-item.c1 .a-name{color:#f87171}
+.analogy-item.c2{border-color:#64748b}.analogy-item.c2 .a-name{color:#94a3b8}
+.analogy-item.c3{border-color:#8b5cf6}.analogy-item.c3 .a-name{color:#a78bfa}
+.analogy-item.c4{border-color:#3b82f6}.analogy-item.c4 .a-name{color:#60a5fa}
+.analogy-item.c5{border-color:#22c55e}.analogy-item.c5 .a-name{color:#4ade80}
+.analogy-summary{font-size:12px;color:#94a3b8;text-align:center;line-height:2;border-top:1px solid #334155;padding-top:16px}
+.analogy-summary b{color:#f8fafc}
 
-/* ══ Big Flow ══ */
-.bigflow{display:flex;align-items:stretch;gap:0;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-.bf-node{width:150px;padding:18px 12px;border-radius:14px;text-align:center;position:relative;flex-shrink:0}
-.bf-node .icon{font-size:1.8rem;margin-bottom:6px}
-.bf-node .name{font-weight:700;font-size:.9rem;margin-bottom:4px}
-.bf-node .desc{font-size:.7rem;color:#94a3b8;line-height:1.4}
-.bf-arrow{display:flex;align-items:center;font-size:1.5rem;color:#475569;padding:0 4px;flex-shrink:0}
-.bf-erp{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25)}
-.bf-py{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25)}
-.bf-json{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25)}
-.bf-server{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25)}
-.bf-dash{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.25)}
-.bf-excel{background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)}
+/* ── 메인 흐름도 ── */
+.flow-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:24px;color:#f8fafc}
+.flow-canvas{position:relative;max-width:960px;margin:0 auto}
 
-/* ══ Card State Flow ══ */
-.state-flow{position:relative;padding:20px 0}
-.state-row{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:12px;flex-wrap:wrap}
-.st{min-width:180px;padding:16px;border-radius:12px;text-align:center;position:relative}
-.st .label{font-weight:800;font-size:.95rem;margin-bottom:4px}
-.st .cond{font-size:.7rem;color:#94a3b8;line-height:1.5}
-.st .how{font-size:.7rem;margin-top:6px;padding:4px 8px;border-radius:6px;display:inline-block}
+/* 상태 박스 */
+.state{position:relative;border-radius:16px;padding:20px;text-align:center;cursor:default;transition:all .3s}
+.state:hover{transform:scale(1.03);z-index:10}
+.state .s-icon{font-size:40px;margin-bottom:8px}
+.state .s-name{font-size:18px;font-weight:800;margin-bottom:4px}
+.state .s-desc{font-size:11px;color:#94a3b8;line-height:1.6}
+.state .s-badge{position:absolute;top:-8px;right:-8px;font-size:10px;padding:4px 10px;border-radius:20px;font-weight:700}
 
-.st-active{background:rgba(239,68,68,.1);border:2px solid rgba(239,68,68,.35)}
-.st-active .label{color:#f87171}
-.st-active .how{background:rgba(239,68,68,.1);color:#fca5a5}
+/* 상태별 색상 */
+.st-active{background:linear-gradient(135deg,#4a1d1d,#2a1010);border:3px solid #ef4444}
+.st-active .s-name{color:#f87171}
+.st-active .s-badge{background:#ef4444;color:#fff}
 
-.st-grave{background:rgba(100,116,139,.1);border:2px solid rgba(100,116,139,.35)}
-.st-grave .label{color:#94a3b8}
-.st-grave .how{background:rgba(100,116,139,.1);color:#cbd5e1}
+.st-grave{background:linear-gradient(135deg,#1e293b,#111827);border:3px solid #64748b}
+.st-grave .s-name{color:#94a3b8}
+.st-grave .s-badge{background:#64748b;color:#fff}
 
-.st-completed{background:rgba(167,139,250,.1);border:2px solid rgba(167,139,250,.35)}
-.st-completed .label{color:#a78bfa}
-.st-completed .how{background:rgba(167,139,250,.1);color:#c4b5fd}
+.st-complete{background:linear-gradient(135deg,#2d1b4e,#1a1040);border:3px solid #8b5cf6}
+.st-complete .s-name{color:#a78bfa}
+.st-complete .s-badge{background:#8b5cf6;color:#fff}
 
-.st-stocked{background:rgba(34,197,94,.1);border:2px solid rgba(34,197,94,.35)}
-.st-stocked .label{color:#4ade80}
-.st-stocked .how{background:rgba(34,197,94,.1);color:#86efac}
+.st-prod{background:linear-gradient(135deg,#1e3a5f,#0f1d33);border:3px solid #3b82f6}
+.st-prod .s-name{color:#60a5fa}
+.st-prod .s-badge{background:#3b82f6;color:#fff}
 
-.st-prod{background:rgba(56,189,248,.1);border:2px solid rgba(56,189,248,.35)}
-.st-prod .label{color:#38bdf8}
-.st-prod .how{background:rgba(56,189,248,.1);color:#7dd3fc}
+.st-stocked{background:linear-gradient(135deg,#1a3d28,#0d2818);border:3px solid #22c55e}
+.st-stocked .s-name{color:#4ade80}
+.st-stocked .s-badge{background:#22c55e;color:#0f172a}
 
-.arrow-box{display:flex;flex-direction:column;align-items:center;padding:0 6px;min-width:80px}
-.arrow-box .arr{font-size:1.6rem;color:#475569}
-.arrow-box .trigger{font-size:.65rem;color:#fbbf24;text-align:center;line-height:1.3;max-width:100px;font-weight:600}
+/* 그리드 레이아웃 */
+.main-row{display:flex;justify-content:center;gap:24px;margin-bottom:0;flex-wrap:wrap}
+.main-row .state{flex:0 0 200px}
 
-.arrow-down-box{display:flex;flex-direction:column;align-items:center;padding:8px 0}
-.arrow-down-box .arr{font-size:1.4rem;color:#475569}
-.arrow-down-box .trigger{font-size:.65rem;color:#fbbf24;text-align:center;line-height:1.3;font-weight:600}
+/* ── 화살표 + 전환 카드 ── */
+.transitions{max-width:960px;margin:48px auto 0}
+.trans-title{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center;color:#f8fafc}
 
-/* ══ ERP Files ══ */
-.erp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.erp-card{background:#1e293b;border-radius:10px;padding:16px;border:1px solid #334155}
-.erp-card .fname{font-weight:700;font-size:.9rem;color:#f87171;margin-bottom:4px}
-.erp-card .role{font-size:.8rem;color:#94a3b8;margin-bottom:8px}
-.erp-card .cols{font-size:.7rem;color:#64748b;line-height:1.5}
-.erp-card .cols strong{color:#cbd5e1}
-.erp-card .arrow-to{font-size:.7rem;color:#fbbf24;margin-top:6px;font-weight:600}
+.trans-card{display:flex;align-items:stretch;background:#1e293b;border:2px solid #334155;border-radius:14px;overflow:hidden;margin-bottom:16px;transition:all .3s}
+.trans-card:hover{border-color:#3b82f6;transform:translateX(4px)}
 
-/* ══ Condition Table ══ */
-.cond-table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:12px;overflow:hidden;font-size:.82rem}
-.cond-table th{background:#334155;padding:10px 14px;text-align:left;color:#94a3b8;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
-.cond-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
-.cond-table tr:last-child td{border-bottom:none}
-.cond-table .from{font-weight:700}
-.cond-table .action{color:#fbbf24}
-.cond-table .auto{color:#22c55e;font-weight:600}
-.cond-table .manual{color:#38bdf8;font-weight:600}
+.trans-left{display:flex;align-items:center;gap:0;padding:16px;flex:1;min-width:0}
+.trans-from,.trans-to{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;text-align:center;min-width:100px}
+.trans-arrow-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 12px}
+.trans-arrow-icon{font-size:24px;color:#3b82f6;line-height:1}
+.trans-trigger-mini{font-size:9px;padding:2px 8px;border-radius:10px;margin-top:4px;font-weight:700}
+.trigger-manual{background:#f59e0b33;color:#fbbf24;border:1px solid #f59e0b55}
+.trigger-auto{background:#22c55e33;color:#4ade80;border:1px solid #22c55e55}
 
-/* ══ Sync diagram ══ */
-.sync-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:16px 0}
-.sync-node{padding:12px 20px;border-radius:10px;text-align:center;font-size:.8rem;min-width:130px}
-.sync-node .name{font-weight:700;font-size:.85rem;margin-bottom:2px}
-.sync-node .desc{font-size:.7rem;color:#94a3b8}
-.sn-local{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);color:#38bdf8}
-.sn-server{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);color:#34d399}
-.sn-google{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:#fbbf24}
-.sync-arrow{color:#475569;font-size:1.2rem}
+.trans-right{padding:16px 20px;border-left:1px solid #334155;flex:1.2;display:flex;flex-direction:column;justify-content:center}
+.trans-right .how{font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.trans-right .how .how-icon{font-size:18px}
+.trans-right .detail{font-size:11px;color:#94a3b8;line-height:1.8}
+.trans-right .detail code{background:#334155;padding:2px 6px;border-radius:4px;color:#fbbf24;font-size:10px}
 
-/* ══ Issue Box ══ */
-.issue-box{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:12px;padding:20px;margin-top:16px}
-.issue-box h4{color:#f87171;margin-bottom:8px;font-size:.9rem}
-.issue-box ul{list-style:none;font-size:.82rem;color:#fca5a5}
-.issue-box li{padding:4px 0;padding-left:16px;position:relative}
-.issue-box li::before{content:'!';position:absolute;left:0;color:#f87171;font-weight:800}
+/* from/to 색상 */
+.c-active{background:#ef444433;color:#f87171;border:1px solid #ef444466}
+.c-grave{background:#47556933;color:#94a3b8;border:1px solid #47556966}
+.c-complete{background:#7c3aed33;color:#c4b5fd;border:1px solid #7c3aed66}
+.c-prod{background:#3b82f633;color:#60a5fa;border:1px solid #3b82f666}
+.c-stocked{background:#22c55e33;color:#4ade80;border:1px solid #22c55e66}
+.c-all{background:linear-gradient(135deg,#ef444433,#3b82f633,#22c55e33);color:#f8fafc;border:1px solid #47556966}
 
-.fix-box{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:20px;margin-top:12px}
-.fix-box h4{color:#34d399;margin-bottom:8px;font-size:.9rem}
-.fix-box ul{list-style:none;font-size:.82rem;color:#86efac}
-.fix-box li{padding:4px 0;padding-left:16px;position:relative}
-.fix-box li::before{content:'✓';position:absolute;left:0;color:#34d399;font-weight:800}
+/* ── 타임라인 (실행 순서) ── */
+.timeline-section{max-width:960px;margin:48px auto 0}
+.tl-title{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center;color:#f8fafc}
+.tl-container{position:relative;padding-left:40px}
+.tl-line{position:absolute;left:18px;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,#3b82f6,#22c55e);border-radius:2px}
+.tl-step{position:relative;margin-bottom:24px;padding:16px 20px;background:#1e293b;border:1px solid #334155;border-radius:12px}
+.tl-step:hover{border-color:#3b82f6}
+.tl-dot{position:absolute;left:-30px;top:20px;width:14px;height:14px;border-radius:50%;border:3px solid #0a0e1a}
+.tl-dot.d1{background:#3b82f6}
+.tl-dot.d2{background:#8b5cf6}
+.tl-dot.d3{background:#f59e0b}
+.tl-dot.d4{background:#22c55e}
+.tl-step .tl-num{font-size:11px;color:#3b82f6;font-weight:700;margin-bottom:4px}
+.tl-step .tl-what{font-size:14px;font-weight:700;color:#f8fafc;margin-bottom:4px}
+.tl-step .tl-how{font-size:12px;color:#94a3b8;line-height:1.8}
+.tl-step .tl-how b{color:#e2e8f0}
 
-/* ══ Legend ══ */
-.legend-bar{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:16px 0;font-size:.75rem}
-.legend-bar .li{display:flex;align-items:center;gap:5px}
-.legend-bar .dot{width:10px;height:10px;border-radius:3px}
+/* ── FAQ ── */
+.faq{max-width:960px;margin:48px auto 0}
+.faq-title{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center;color:#f8fafc}
+.faq-item{background:#1e293b;border:1px solid #334155;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.faq-q{padding:14px 20px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;color:#f8fafc}
+.faq-q:hover{background:#162032}
+.faq-q .q-icon{color:#3b82f6;font-size:18px}
+.faq-a{padding:0 20px 14px;font-size:12px;color:#94a3b8;line-height:1.8;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-item.open .faq-q{border-bottom:1px solid #334155}
 
 @media(max-width:768px){
-  .bigflow{flex-direction:column;align-items:center}
-  .bf-arrow{transform:rotate(90deg)}
-  .state-row{flex-direction:column;align-items:center}
-  .arrow-box{flex-direction:row;padding:4px 0}
-  .arrow-box .arr{transform:rotate(90deg)}
+  .analogy-grid{grid-template-columns:repeat(3,1fr)}
+  .main-row{flex-direction:column;align-items:center}
+  .trans-card{flex-direction:column}
+  .trans-right{border-left:none;border-top:1px solid #334155}
+  .trans-left{flex-wrap:wrap;justify-content:center}
 }
 </style>
 </head>
 <body>
-<div class="container">
 
-<h1>Soltri 선생산 시스템 흐름도</h1>
-<p class="subtitle">전체 데이터 흐름 + 품목 상태 전이 + 동기화 구조</p>
+<h1><em>선생산 시스템</em> 상태 흐름도</h1>
+<p class="subtitle">품목이 어떤 상태를 거치는지, 초보자도 한눈에 이해할 수 있는 가이드</p>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 1: 전체 파이프라인 -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">1</span>전체 데이터 파이프라인</div>
-
-  <div class="bigflow">
-    <div class="bf-node bf-erp">
-      <div class="icon">📊</div>
-      <div class="name">ERP 엑셀 4종</div>
-      <div class="desc">라벨조회<br>완제품재고창고<br>가공작업조회<br>발주조회</div>
-    </div>
-    <div class="bf-arrow">→</div>
-    <div class="bf-node bf-py">
-      <div class="icon">🐍</div>
-      <div class="name">refresh.py</div>
-      <div class="desc">빈도 분석<br>스코어링<br>발주 매칭</div>
-    </div>
-    <div class="bf-arrow">→</div>
-    <div class="bf-node bf-json">
-      <div class="icon">📄</div>
-      <div class="name">data_wr.json</div>
-      <div class="desc">W/R 품목 리스트<br>점수·재고·발주일</div>
-    </div>
-    <div class="bf-arrow">→</div>
-    <div class="bf-node bf-server">
-      <div class="icon">🖥️</div>
-      <div class="name">server.py :8585</div>
-      <div class="desc">정적 파일 서빙<br>graveyard.json 관리</div>
-    </div>
-    <div class="bf-arrow">→</div>
-    <div class="bf-node bf-dash">
-      <div class="icon">📱</div>
-      <div class="name">대시보드</div>
-      <div class="desc">안전재고발주.html<br>5개 섹션 카드뷰</div>
-    </div>
-    <div class="bf-arrow">→</div>
-    <div class="bf-node bf-excel">
-      <div class="icon">📋</div>
-      <div class="name">발주서 엑셀</div>
-      <div class="desc">PROFORMA INVOICE<br>ERP 업로드용</div>
-    </div>
+<!-- ══════════════════════════════════ -->
+<!-- 비유로 이해하기 -->
+<!-- ══════════════════════════════════ -->
+<div class="analogy">
+<h2>병원 대기실에 비유하면?</h2>
+<div class="analogy-grid">
+  <div class="analogy-item c1">
+    <div class="emoji">&#x1F6A8;</div>
+    <div class="a-name">선생산 필요</div>
+    <div class="a-desc">응급실 대기<br>"빨리 치료해야 해!"<br>재고가 부족한 품목</div>
   </div>
-
-  <div class="legend-bar">
-    <div class="li"><span class="dot" style="background:#f87171"></span>ERP 입력</div>
-    <div class="li"><span class="dot" style="background:#fbbf24"></span>Python 처리</div>
-    <div class="li"><span class="dot" style="background:#34d399"></span>JSON 데이터</div>
-    <div class="li"><span class="dot" style="background:#38bdf8"></span>서버</div>
-    <div class="li"><span class="dot" style="background:#c084fc"></span>대시보드 UI</div>
-    <div class="li"><span class="dot" style="background:#fb923c"></span>출력물</div>
+  <div class="analogy-item c2">
+    <div class="emoji">&#x1F3E5;</div>
+    <div class="a-name">생산지시 중</div>
+    <div class="a-desc">수술실에 들어감<br>"치료 진행 중"<br>발주 요청한 상태</div>
+  </div>
+  <div class="analogy-item c3">
+    <div class="emoji">&#x1F489;</div>
+    <div class="a-name">생산지시 완료</div>
+    <div class="a-desc">수술 끝, 회복실<br>"치료는 했어요"<br>발주 확인됨</div>
+  </div>
+  <div class="analogy-item c4">
+    <div class="emoji">&#x1F3C3;</div>
+    <div class="a-name">이미 생산중</div>
+    <div class="a-desc">다른 의사가 치료 중<br>"이미 돌보는 사람 있음"<br>7일내 가공이력 있음</div>
+  </div>
+  <div class="analogy-item c5">
+    <div class="emoji">&#x1F3E0;</div>
+    <div class="a-name">재고 충분</div>
+    <div class="a-desc">퇴원 완료!<br>"건강해졌어요"<br>재고가 충분히 찼음</div>
   </div>
 </div>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 2: ERP 엑셀 역할 -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">2</span>ERP 엑셀 → refresh.py가 뽑아내는 것</div>
-
-  <div class="erp-grid">
-    <div class="erp-card">
-      <div class="fname">라벨조회.xlsx</div>
-      <div class="role">거래처 주문 전체 이력</div>
-      <div class="cols">
-        <strong>거래처</strong>, 주문번호, 치수, 재질, 수량, 품목<br>
-        "안전재고" 주문은 빈도 집계에서 제외
-      </div>
-      <div class="arrow-to">→ freq, total_qty, customers, score</div>
-    </div>
-    <div class="erp-card">
-      <div class="fname">완제품재고창고.xlsx</div>
-      <div class="role">현재 창고 재고 수량</div>
-      <div class="cols">
-        내경, 외경, 높이, <strong>재질</strong>, 품종, <strong>현재재고</strong>
-      </div>
-      <div class="arrow-to">→ stock, stock_ratio</div>
-    </div>
-    <div class="erp-card">
-      <div class="fname">가공작업조회.xlsx</div>
-      <div class="role">최근 7일 CNC 생산 이력</div>
-      <div class="cols">
-        작업시작일, 치수, 재질<br>
-        7일 내 생산 시작된 품목 감지
-      </div>
-      <div class="arrow-to">→ in_production = true/false</div>
-    </div>
-    <div class="erp-card">
-      <div class="fname">발주조회.xlsx</div>
-      <div class="role">안전재고 발주 이력</div>
-      <div class="cols">
-        업체치수 "WEAR RING_PW <strong>D75D70W19.5</strong>"<br>
-        주문번호에 "안전재고" 포함 건만 인식
-      </div>
-      <div class="arrow-to">→ latest_balju (발주 날짜)</div>
-    </div>
-  </div>
+<div class="analogy-summary">
+  <b>요약:</b> 재고가 부족하면 응급실(선생산 필요)에 오고 &rarr; 발주하면 수술실(생산지시 중)로 가고 &rarr;<br>
+  발주가 확인되면 회복실(생산지시 완료) &rarr; 재고가 차면 퇴원(재고 충분)!
+</div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 3: 품목 상태 전이도 (핵심!) -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">3</span>품목 상태 전이도 (핵심)</div>
+<!-- ══════════════════════════════════ -->
+<!-- 5가지 상태 -->
+<!-- ══════════════════════════════════ -->
+<div class="flow-canvas">
+<div class="flow-title">5가지 상태</div>
 
-  <!-- Row 1: Active → Grave -->
-  <div class="state-row">
-    <div class="st st-active">
-      <div class="label">선생산 필요</div>
-      <div class="cond">
-        in_production = false<br>
-        재고율 ≤ 필터값<br>
-        graveyard에 없음<br>
-        completed에 없음
-      </div>
-    </div>
-
-    <div class="arrow-box">
-      <div class="trigger">카드 클릭</div>
-      <div class="arr">→</div>
-      <div class="trigger" style="color:#38bdf8">수동</div>
-    </div>
-
-    <div class="st st-grave">
-      <div class="label">생산지시 중</div>
-      <div class="cond">
-        graveyard에 등록됨<br>
-        지시일(graveDate) 기록
-      </div>
-      <div class="how">엑셀 생성 → ERP 발주</div>
-    </div>
-
-    <div class="arrow-box">
-      <div class="trigger">latest_balju ≥ 지시일<br><span style="font-size:.6rem;color:#64748b">또는 [완료] 버튼</span></div>
-      <div class="arr">→</div>
-      <div class="trigger" style="color:#22c55e">자동 / 수동</div>
-    </div>
-
-    <div class="st st-completed">
-      <div class="label">생산지시 완료</div>
-      <div class="cond">
-        completed에 등록됨<br>
-        지시일 + 완료일 기록
-      </div>
-    </div>
+<div class="main-row">
+  <div class="state st-active">
+    <div class="s-badge">수동 이동</div>
+    <div class="s-icon">&#x1F6A8;</div>
+    <div class="s-name">선생산 필요</div>
+    <div class="s-desc">재고 부족!<br>빨리 만들어야 할 품목<br><br>freq &ge; 10, 재고율 &le; 30%</div>
   </div>
-
-  <!-- Row 2: Side paths -->
-  <div style="display:flex;justify-content:center;gap:60px;margin:8px 0;flex-wrap:wrap">
-
-    <!-- Grave ← Active (undo) -->
-    <div style="text-align:center">
-      <div style="font-size:.7rem;color:#475569;margin-bottom:4px">생산지시 중 → 선생산 필요</div>
-      <div style="font-size:.65rem;color:#38bdf8;font-weight:600">카드 클릭 (복귀) 또는 되돌리기</div>
-    </div>
-
-    <!-- Stocked -->
-    <div style="text-align:center">
-      <div class="st st-stocked" style="display:inline-block;min-width:160px">
-        <div class="label">재고 충분</div>
-        <div class="cond">재고율 > 필터값(30%)</div>
-      </div>
-      <div style="font-size:.65rem;color:#22c55e;margin-top:4px">재고 쌓이면 자동 이동</div>
-    </div>
-
-    <!-- Prod -->
-    <div style="text-align:center">
-      <div class="st st-prod" style="display:inline-block;min-width:160px">
-        <div class="label">이미 생산중</div>
-        <div class="cond">in_production = true<br>graveyard에 없음</div>
-      </div>
-      <div style="font-size:.65rem;color:#38bdf8;margin-top:4px">카드 클릭 → 생산지시 중으로 이동 가능</div>
-    </div>
+  <div class="state st-grave">
+    <div class="s-badge">허브</div>
+    <div class="s-icon">&#x1F4CB;</div>
+    <div class="s-name">생산지시 중</div>
+    <div class="s-desc">"이거 만들어주세요"<br>발주 요청한 상태<br><br>graveyard에 날짜 저장</div>
   </div>
-
-  <!-- 전이 조건 테이블 -->
-  <div style="margin-top:24px">
-    <table class="cond-table">
-      <thead>
-        <tr><th>From</th><th>To</th><th>트리거</th><th>방식</th><th>상세 조건</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="from" style="color:#f87171">선생산 필요</td>
-          <td style="color:#94a3b8">생산지시 중</td>
-          <td class="action">카드 클릭</td>
-          <td class="manual">수동</td>
-          <td>graveyard에 key + ISO 날짜 저장</td>
-        </tr>
-        <tr>
-          <td class="from" style="color:#94a3b8">생산지시 중</td>
-          <td style="color:#a78bfa">생산지시 완료</td>
-          <td class="action">latest_balju ≥ graveDate</td>
-          <td class="auto">자동</td>
-          <td>refresh.py 실행 → 발주조회에서 안전재고 발주일 감지 → start.bat 재실행 시 자동 이동</td>
-        </tr>
-        <tr>
-          <td class="from" style="color:#94a3b8">생산지시 중</td>
-          <td style="color:#a78bfa">생산지시 완료</td>
-          <td class="action">[완료] 버튼</td>
-          <td class="manual">수동</td>
-          <td>hover → [완료] 클릭. 발주조회 매칭 안 될 때 사용</td>
-        </tr>
-        <tr>
-          <td class="from" style="color:#94a3b8">생산지시 중</td>
-          <td style="color:#f87171">선생산 필요</td>
-          <td class="action">카드 클릭 (복귀)</td>
-          <td class="manual">수동</td>
-          <td>graveyard에서 제거, 되돌리기 가능</td>
-        </tr>
-        <tr>
-          <td class="from" style="color:#38bdf8">이미 생산중</td>
-          <td style="color:#94a3b8">생산지시 중</td>
-          <td class="action">카드 클릭</td>
-          <td class="manual">수동</td>
-          <td>7일 가공이력에 잡혔지만 우리가 발주한 건 → graveyard로 이동</td>
-        </tr>
-        <tr>
-          <td class="from">모든 상태</td>
-          <td style="color:#4ade80">재고 충분</td>
-          <td class="action">stock_ratio > 필터값</td>
-          <td class="auto">자동</td>
-          <td>재고가 채워지면 자동으로 이동</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="state st-complete">
+    <div class="s-badge">자동 이동</div>
+    <div class="s-icon">&#x2705;</div>
+    <div class="s-name">생산지시 완료</div>
+    <div class="s-desc">발주가 확인됨<br>물건 들어오는 중<br><br>발주일 &ge; 지시일</div>
+  </div>
+  <div class="state st-prod">
+    <div class="s-badge">자동 감지</div>
+    <div class="s-icon">&#x2699;</div>
+    <div class="s-name">이미 생산중</div>
+    <div class="s-desc">내가 안 시켰는데<br>이미 만들고 있음<br><br>7일내 가공이력 존재</div>
+  </div>
+  <div class="state st-stocked">
+    <div class="s-badge">최종 목표</div>
+    <div class="s-icon">&#x1F4E6;</div>
+    <div class="s-name">재고 충분</div>
+    <div class="s-desc">재고 OK!<br>더 안 만들어도 됨<br><br>재고율 &gt; 30%</div>
   </div>
 </div>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 4: 상태 저장 & 동기화 -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">4</span>상태 저장 & 동기화</div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
-    <!-- 데이터 (품목 정보) -->
-    <div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
-      <div style="font-weight:700;color:#34d399;margin-bottom:10px;font-size:.9rem">품목 데이터 (점수·재고·빈도)</div>
-      <div class="sync-row" style="margin:0">
-        <div class="sync-node sn-server" style="min-width:auto;padding:8px 14px">
-          <div class="name">data_wr.json</div>
-          <div class="desc">refresh.py가 생성</div>
-        </div>
-        <span class="sync-arrow">→</span>
-        <div class="sync-node sn-google" style="min-width:auto;padding:8px 14px">
-          <div class="name">Google Sheets</div>
-          <div class="desc">선생산리스트 탭</div>
-        </div>
-        <span class="sync-arrow">→</span>
-        <div class="sync-node" style="min-width:auto;padding:8px 14px;background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);color:#c084fc">
-          <div class="name">대시보드</div>
-          <div class="desc">JSONP로 로드</div>
-        </div>
-      </div>
-      <div style="font-size:.7rem;color:#64748b;text-align:center;margin-top:8px">start.bat 실행 시마다 갱신</div>
-    </div>
-
-    <!-- 상태 (graveyard/completed) -->
-    <div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155">
-      <div style="font-weight:700;color:#fbbf24;margin-bottom:10px;font-size:.9rem">사용자 상태 (생산지시·완료)</div>
-      <div class="sync-row" style="margin:0">
-        <div class="sync-node sn-local" style="min-width:auto;padding:8px 14px">
-          <div class="name">localStorage</div>
-          <div class="desc">브라우저 로컬</div>
-        </div>
-        <span class="sync-arrow">↔</span>
-        <div class="sync-node sn-google" style="min-width:auto;padding:8px 14px">
-          <div class="name">Apps Script</div>
-          <div class="desc">"무덤" 시트</div>
-        </div>
-        <span class="sync-arrow">↔</span>
-        <div class="sync-node sn-server" style="min-width:auto;padding:8px 14px">
-          <div class="name">graveyard.json</div>
-          <div class="desc">서버 로컬 파일</div>
-        </div>
-      </div>
-      <div style="font-size:.7rem;color:#64748b;text-align:center;margin-top:8px">카드 클릭 시마다 3곳 동시 저장</div>
-    </div>
-  </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 5: start.bat 실행 순서 -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">5</span>start.bat 실행하면 일어나는 일</div>
+<!-- ══════════════════════════════════ -->
+<!-- 전환 상세 -->
+<!-- ══════════════════════════════════ -->
+<div class="transitions">
+<div class="trans-title">상태 전환 6가지 (언제, 어떻게 이동하나?)</div>
 
-  <div style="display:flex;gap:0;align-items:stretch;justify-content:center;flex-wrap:wrap">
-    <div style="background:#1e293b;border-radius:12px 0 0 12px;padding:16px 20px;border:1px solid #334155;text-align:center;min-width:150px">
-      <div style="font-size:1.2rem;margin-bottom:4px">1</div>
-      <div style="font-weight:700;font-size:.85rem;color:#fbbf24">refresh.py</div>
-      <div style="font-size:.7rem;color:#94a3b8;margin-top:4px">
-        라벨조회 → 빈도분석<br>
-        재고창고 → 재고 매칭<br>
-        가공작업 → 생산중 판별<br>
-        발주조회 → 발주일 매칭<br>
-        <span style="color:#34d399">→ data_wr.json 생성</span><br>
-        <span style="color:#34d399">→ Google Sheets 업로드</span>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;font-size:1.5rem;color:#475569;padding:0 8px">→</div>
-    <div style="background:#1e293b;padding:16px 20px;border:1px solid #334155;text-align:center;min-width:150px">
-      <div style="font-size:1.2rem;margin-bottom:4px">2</div>
-      <div style="font-weight:700;font-size:.85rem;color:#38bdf8">server.py</div>
-      <div style="font-size:.7rem;color:#94a3b8;margin-top:4px">
-        :8585 포트 시작<br>
-        정적 파일 서빙<br>
-        graveyard.json R/W
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;font-size:1.5rem;color:#475569;padding:0 8px">→</div>
-    <div style="background:#1e293b;padding:16px 20px;border:1px solid #334155;text-align:center;min-width:150px">
-      <div style="font-size:1.2rem;margin-bottom:4px">3</div>
-      <div style="font-weight:700;font-size:.85rem;color:#c084fc">브라우저 열림</div>
-      <div style="font-size:.7rem;color:#94a3b8;margin-top:4px">
-        Google Sheets에서<br>
-        graveyard 로드<br>
-        선생산리스트 로드<br>
-        <span style="color:#fbbf24">autoRemoveGraveyard()</span><br>
-        <span style="color:#64748b">latest_balju ≥ 지시일 체크</span>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;font-size:1.5rem;color:#475569;padding:0 8px">→</div>
-    <div style="background:#1e293b;border-radius:0 12px 12px 0;padding:16px 20px;border:1px solid #334155;text-align:center;min-width:150px">
-      <div style="font-size:1.2rem;margin-bottom:4px">4</div>
-      <div style="font-weight:700;font-size:.85rem;color:#4ade80">화면 렌더링</div>
-      <div style="font-size:.7rem;color:#94a3b8;margin-top:4px">
-        5개 섹션에<br>
-        카드 분류 표시<br>
-        주문 이력 타임라인
-      </div>
-    </div>
+<!-- 1 -->
+<div class="trans-card">
+<div class="trans-left">
+  <div class="trans-from c-active">선생산 필요</div>
+  <div class="trans-arrow-box">
+    <div class="trans-arrow-icon">&#x27A1;</div>
+    <div class="trans-trigger-mini trigger-manual">수동</div>
+  </div>
+  <div class="trans-to c-grave">생산지시 중</div>
+</div>
+<div class="trans-right">
+  <div class="how"><span class="how-icon">&#x1F5B1;</span> 카드를 클릭하면 이동</div>
+  <div class="detail">
+    "이 품목 발주해야겠다!" 싶을 때 카드를 클릭하면<br>
+    <code>graveyard[key] = "2026-03-24T09:30:00"</code> 날짜가 기록되고<br>
+    "생산지시 중" 섹션으로 넘어갑니다
   </div>
 </div>
-
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 6: 자동완료가 안 되는 경우 -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">6</span>자동 완료가 안 되는 케이스</div>
-
-  <div class="issue-box">
-    <h4>자동 완료 실패 원인</h4>
-    <ul>
-      <li>발주조회에 "안전재고" 키워드가 주문번호에 없음 (일반 거래처명으로 발주)</li>
-      <li>발주조회의 치수 형식이 "WEAR RING_PW D{외경}D{내경}W{높이}" 형식이 아님 (예: "115x109x30")</li>
-      <li>발주조회 엑셀이 아직 ERP에서 최신 다운로드되지 않음</li>
-      <li>start.bat(refresh.py)을 아직 재실행하지 않음</li>
-    </ul>
-  </div>
-
-  <div class="fix-box">
-    <h4>해결 방법</h4>
-    <ul>
-      <li><strong>자동:</strong> ERP에서 발주조회 최신 다운로드 → start.bat 재실행</li>
-      <li><strong>수동:</strong> "생산지시 중" 카드 hover → [완료] 버튼 클릭</li>
-      <li><strong>예방:</strong> 안전재고 발주 시 주문번호에 "안전재고" 포함시키기</li>
-    </ul>
-  </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- SECTION 7: 오늘 바뀐 것 -->
-<!-- ══════════════════════════════════════════ -->
-<div class="sec">
-  <div class="sec-title"><span class="num">7</span>오늘 수정된 내용</div>
+<!-- 2 -->
+<div class="trans-card">
+<div class="trans-left">
+  <div class="trans-from c-grave">생산지시 중</div>
+  <div class="trans-arrow-box">
+    <div class="trans-arrow-icon">&#x27A1;</div>
+    <div class="trans-trigger-mini trigger-auto">자동</div>
+  </div>
+  <div class="trans-to c-complete">생산지시 완료</div>
+</div>
+<div class="trans-right">
+  <div class="how"><span class="how-icon">&#x1F504;</span> start.bat 재실행 시 자동 감지</div>
+  <div class="detail">
+    refresh.py가 <b>발주조회.xlsx</b>에서 안전재고 발주일을 읽어와서<br>
+    <code>latest_balju &ge; graveDate</code> 이면 "아, 이미 발주됐구나!" 하고<br>
+    자동으로 "생산지시 완료"로 이동시킵니다
+  </div>
+</div>
+</div>
 
-  <table class="cond-table">
-    <thead><tr><th>파일</th><th>변경</th><th>이유</th></tr></thead>
-    <tbody>
-      <tr>
-        <td class="from">안전재고발주.html</td>
-        <td>"이미 생산중" 카드 클릭 가능</td>
-        <td>안전재고 발주했는데 7일 카테고리에 갇히는 문제</td>
-      </tr>
-      <tr>
-        <td class="from">안전재고발주.html</td>
-        <td>"생산지시 중" 카드에 [완료] 버튼 추가</td>
-        <td>발주조회 매칭 안 될 때 수동 완료 처리</td>
-      </tr>
-      <tr>
-        <td class="from">안전재고발주.html</td>
-        <td>prodItems에서 completed 제외</td>
-        <td>완료 상태가 "이미 생산중"에 중복 표시되는 것 방지</td>
-      </tr>
-      <tr>
-        <td class="from">안전재고발주.html</td>
-        <td>graveyard.json 서버 자동 저장</td>
-        <td>refresh.py가 graveyard 상태를 읽을 수 있도록</td>
-      </tr>
-      <tr>
-        <td class="from">refresh.py</td>
-        <td>graveyard.json 읽기 + in_production 제외</td>
-        <td>생산지시 중 품목이 7일에 안 걸리도록</td>
-      </tr>
-    </tbody>
-  </table>
+<!-- 3 -->
+<div class="trans-card">
+<div class="trans-left">
+  <div class="trans-from c-grave">생산지시 중</div>
+  <div class="trans-arrow-box">
+    <div class="trans-arrow-icon">&#x27A1;</div>
+    <div class="trans-trigger-mini trigger-manual">수동</div>
+  </div>
+  <div class="trans-to c-complete">생산지시 완료</div>
+</div>
+<div class="trans-right">
+  <div class="how"><span class="how-icon">&#x1F58D;</span> [완료] 버튼 클릭</div>
+  <div class="detail">
+    발주조회 데이터에 안 잡힐 때 (예: 구두 발주, 다른 경로)<br>
+    카드에 마우스를 올리면 나타나는 <b>[완료]</b> 버튼을 눌러서<br>
+    직접 "생산지시 완료"로 보냅니다
+  </div>
+</div>
+</div>
+
+<!-- 4 -->
+<div class="trans-card">
+<div class="trans-left">
+  <div class="trans-from c-grave">생산지시 중</div>
+  <div class="trans-arrow-box">
+    <div class="trans-arrow-icon">&#x27A1;</div>
+    <div class="trans-trigger-mini trigger-manual">수동</div>
+  </div>
+  <div class="trans-to c-active">선생산 필요</div>
+</div>
+<div class="trans-right">
+  <div class="how"><span class="how-icon">&#x21A9;</span> 카드 클릭 (되돌리기)</div>
+  <div class="detail">
+    "아, 이거 발주 안 해도 되겠다" 싶을 때<br>
+    생산지시 중 카드를 클릭하면 다시 "선생산 필요"로 돌아갑니다<br>
+    실수로 클릭해도 <b>되돌리기(Undo)</b> 버튼으로 복구 가능!
+  </div>
+</div>
+</div>
+
+<!-- 5 -->
+<div class="trans-card">
+<div class="trans-left">
+  <div class="trans-from c-prod">이미 생산중</div>
+  <div class="trans-arrow-box">
+    <div class="trans-arrow-icon">&#x27A1;</div>
+    <div class="trans-trigger-mini trigger-manual">수동</div>
+  </div>
+  <div class="trans-to c-grave">생산지시 중</div>
+</div>
+<div class="trans-right">
+  <div class="how"><span class="how-icon">&#x1F5B1;</span> 카드를 클릭하면 이동</div>
+  <div class="detail">
+    7일 내 가공이력에 잡혀서 "이미 생산중"에 있지만<br>
+    <b>우리가 발주한 건</b>일 수 있으니까 클릭해서<br>
+    "생산지시 중"으로 옮겨서 추적할 수 있습니다
+  </div>
+</div>
+</div>
+
+<!-- 6 -->
+<div class="trans-card">
+<div class="trans-left">
+  <div class="trans-from c-all">모든 상태</div>
+  <div class="trans-arrow-box">
+    <div class="trans-arrow-icon">&#x27A1;</div>
+    <div class="trans-trigger-mini trigger-auto">자동</div>
+  </div>
+  <div class="trans-to c-stocked">재고 충분</div>
+</div>
+<div class="trans-right">
+  <div class="how"><span class="how-icon">&#x1F4E6;</span> 재고가 채워지면 자동 이동</div>
+  <div class="detail">
+    어떤 상태에 있든 <code>stock_ratio &gt; 30%</code> (재고율 기준 초과)이면<br>
+    자동으로 "재고 충분"으로 이동합니다<br>
+    <b>최종 목표!</b> 여기 오면 더 이상 신경 안 써도 됩니다
+  </div>
+</div>
 </div>
 
 </div>
+
+<!-- ══════════════════════════════════ -->
+<!-- 실행 타임라인 -->
+<!-- ══════════════════════════════════ -->
+<div class="timeline-section">
+<div class="tl-title">실제 사용 순서 (매일 이렇게 쓰면 됩니다)</div>
+<div class="tl-container">
+<div class="tl-line"></div>
+
+<div class="tl-step">
+  <div class="tl-dot d1"></div>
+  <div class="tl-num">STEP 1</div>
+  <div class="tl-what">ERP에서 엑셀 4개 다운로드</div>
+  <div class="tl-how">
+    ERP 시스템에서 <b>라벨조회</b>, <b>완제품재고창고</b>, <b>가공작업조회</b>, <b>발주조회</b> 엑셀을<br>
+    <code>ERP_downloaded_data/</code> 폴더에 저장합니다<br>
+    (파일명이 정확해야 합니다!)
+  </div>
+</div>
+
+<div class="tl-step">
+  <div class="tl-dot d2"></div>
+  <div class="tl-num">STEP 2</div>
+  <div class="tl-what">start.bat 더블클릭</div>
+  <div class="tl-how">
+    <b>refresh.py</b>가 실행되면서 엑셀 데이터를 분석하고<br>
+    <b>data_wr.json</b> (핵심 품목 목록)과 <b>Google Sheets</b>를 업데이트합니다<br>
+    분석 완료 후 <b>안전재고발주.html</b>이 자동으로 브라우저에 열립니다
+  </div>
+</div>
+
+<div class="tl-step">
+  <div class="tl-dot d3"></div>
+  <div class="tl-num">STEP 3</div>
+  <div class="tl-what">대시보드에서 발주할 품목 클릭</div>
+  <div class="tl-how">
+    "선생산 필요" 섹션에서 발주해야 할 카드를 <b>클릭</b>하면<br>
+    "생산지시 중"으로 이동합니다<br>
+    여러 개를 선택한 뒤 <b>[엑셀 다운로드]</b> 버튼으로 발주서를 만들 수도 있습니다
+  </div>
+</div>
+
+<div class="tl-step">
+  <div class="tl-dot d4"></div>
+  <div class="tl-num">STEP 4</div>
+  <div class="tl-what">다음날 다시 start.bat 실행하면...</div>
+  <div class="tl-how">
+    발주가 ERP에 등록되었으면 &rarr; <b>자동으로</b> "생산지시 완료"로 이동<br>
+    재고가 충분히 채워졌으면 &rarr; <b>자동으로</b> "재고 충분"으로 이동<br>
+    매일 반복하면 시스템이 알아서 상태를 관리해줍니다!
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!-- FAQ -->
+<!-- ══════════════════════════════════ -->
+<div class="faq">
+<div class="faq-title">자주 묻는 질문</div>
+
+<div class="faq-item">
+  <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+    <span class="q-icon">Q</span> 실수로 카드를 클릭했어요. 어떻게 되돌리나요?
+  </div>
+  <div class="faq-a">
+    상단의 <b>되돌리기</b> 버튼을 누르면 마지막 동작이 취소됩니다.<br>
+    또는 "생산지시 중"에 있는 카드를 다시 클릭하면 "선생산 필요"로 돌아갑니다.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+    <span class="q-icon">Q</span> "이미 생산중"에 있는 건 뭔가요?
+  </div>
+  <div class="faq-a">
+    최근 7일 내 ERP <b>가공작업조회</b>에 생산 기록이 있는 품목입니다.<br>
+    내가 발주하지 않았는데 공장에서 이미 만들고 있는 것이에요.<br>
+    만약 내가 발주한 것이라면, 카드를 클릭해서 "생산지시 중"으로 옮기면 됩니다.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+    <span class="q-icon">Q</span> "재고 충분"은 언제 자동으로 이동하나요?
+  </div>
+  <div class="faq-a">
+    재고율이 필터 기준(기본 30%)을 넘으면 <b>어떤 상태에서든</b> 자동으로 이동합니다.<br>
+    단, 재고 데이터는 <b>start.bat을 다시 실행해야</b> 갱신됩니다.<br>
+    (ERP에서 완제품재고창고.xlsx를 다시 다운로드 → start.bat 실행)
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+    <span class="q-icon">Q</span> 점수(score)가 높으면 뭐가 다른가요?
+  </div>
+  <div class="faq-a">
+    점수 = <b>빈도 점수</b> + <b>긴급도</b>로 계산됩니다.<br>
+    &bull; 빈도 점수: 주문이 자주 올수록 높음 (최대 50+점)<br>
+    &bull; 긴급도: 재고가 적을수록 높음 (최대 50점)<br>
+    <b>점수가 높을수록 먼저 만들어야 하는 품목</b>입니다. 카드 목록도 점수순으로 정렬됩니다.
+  </div>
+</div>
+
+<div class="faq-item">
+  <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+    <span class="q-icon">Q</span> 인터넷 없이도 쓸 수 있나요?
+  </div>
+  <div class="faq-a">
+    네! <b>data_wr.js</b> 파일이 있으면 서버 없이 HTML을 더블클릭해도 됩니다.<br>
+    다만 Google Sheets 동기화, 발주일 자동 감지 같은 기능은 <b>start.bat 실행</b>이 필요합니다.
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;padding:32px;color:#475569;font-size:11px">
+  Soltri 선생산 관리 시스템 &mdash; Generated by Claude Code &mdash; <span id="d"></span>
+</div>
+<script>document.getElementById('d').textContent=new Date().toLocaleDateString('ko-KR');</script>
+
 </body>
 </html>
