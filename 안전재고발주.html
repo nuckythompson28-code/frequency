@@ -246,6 +246,15 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <div class="grid" id="gridProd" style="display:none"></div>
 </div>
 
+<div class="section" id="secOrphan" style="display:none">
+  <div class="section-header" onclick="toggleSection('orphan')" style="cursor:pointer">
+    <h2 style="color:#f59e0b">&#x26A0; 추적 불가 품목</h2>
+    <span class="badge" id="badgeOrphan" style="background:#f59e0b33;color:#fbbf24">0</span>
+    <span class="toggle" id="toggleOrphan">▼</span>
+  </div>
+  <div id="gridOrphan"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="modal-bg" id="modalBg" onclick="closeModal(event)">
@@ -301,14 +310,17 @@ function clearExcel() {
 
 const STORAGE_KEY = 'soltri_graveyard';
 const COMPLETED_KEY = 'soltri_completed';
+const ARCHIVED_KEY = 'soltri_archived';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwGhEtnGrHKXr3dVg_9db_kyeWAH6gS4pu4NNk09H8X6Rsr2dDb4B50BLMG_G20K7s/exec';
 let graveyard = {};
 let completed = {};
+let archived = {};  // 재고 충분으로 졸업한 이력 보존
 let undoStack = [];
 
 function saveLocal() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(graveyard));
   localStorage.setItem(COMPLETED_KEY, JSON.stringify(completed));
+  localStorage.setItem(ARCHIVED_KEY, JSON.stringify(archived));
 }
 
 function syncToSheet(type) {
@@ -347,6 +359,7 @@ function loadGraveyardFromSheet(callback) {
   if (!APPS_SCRIPT_URL) {
     graveyard = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     completed = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}');
+    archived = JSON.parse(localStorage.getItem(ARCHIVED_KEY) || '{}');
     callback(); return;
   }
   const cbName = '_loadGrave_' + Date.now();
@@ -363,6 +376,7 @@ function loadGraveyardFromSheet(callback) {
   sc.onerror = function() {
     graveyard = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     completed = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}');
+    archived = JSON.parse(localStorage.getItem(ARCHIVED_KEY) || '{}');
     delete window[cbName];
     callback();
   };
@@ -431,20 +445,52 @@ function render() {
 
   // 재고율 기준은 필터값 사용
   const isStocked = r => r.stock >= 0 && r.stock_ratio > filterStock;
+  const itemKeys = new Set(ITEMS.map(r => r.key));
 
-  // 재고 충분해진 completed 품목 자동 정리
+  // ── 시나리오 3: graveyard에 있는 품목은 in_production 무시 ──
+  // (이미 우리가 추적 중이므로 "이미 생산중"에 중복 표시 방지)
+  ITEMS.forEach(r => {
+    if (isInGrave(r.key) || r.key in completed) {
+      r._origInProd = r.in_production;
+      r.in_production = false;
+    }
+  });
+
+  // ── 시나리오 2: completed → 재고 충분 이동 시 이력 보존 (archived) ──
   let autoMoved = 0;
   for (const key of Object.keys(completed)) {
     const item = ITEMS.find(r => r.key === key);
     if (item && isStocked(item)) {
+      archived[key] = {
+        graveDate: completed[key].graveDate,
+        completedDate: completed[key].completedDate,
+        archivedDate: new Date().toISOString().slice(0, 10),
+        chisu: item.chisu,
+        jaejil: item.jaejil
+      };
       delete completed[key];
       autoMoved++;
     }
   }
   if (autoMoved > 0) {
     saveCompleted();
-    showToast(`재고 충족 ${autoMoved}개 → 재고 충분으로 자동 이동`);
+    showToast(`재고 충족 ${autoMoved}개 → 재고 충분으로 자동 이동 (이력 보존됨)`);
   }
+
+  // ── 시나리오 1: orphan 감지 (graveyard/completed에 있는데 ITEMS에 없는 품목) ──
+  const orphanGrave = [];
+  for (const [key, date] of Object.entries(graveyard)) {
+    if (!itemKeys.has(key)) {
+      orphanGrave.push({ key, date, type: '생산지시 중', source: 'graveyard' });
+    }
+  }
+  const orphanCompleted = [];
+  for (const [key, info] of Object.entries(completed)) {
+    if (!itemKeys.has(key)) {
+      orphanCompleted.push({ key, date: info.graveDate, completedDate: info.completedDate, type: '생산지시 완료', source: 'completed' });
+    }
+  }
+  const orphans = [...orphanGrave, ...orphanCompleted];
 
   const activeItems = ITEMS.filter(r =>
     !r.in_production && !isStocked(r) && !isInGrave(r.key) && !(r.key in completed) &&
@@ -472,6 +518,33 @@ function render() {
     ? stockedItems.map(r => makeCard(r, 'stocked')).join('')
     : '<div class="empty-msg">아직 없음</div>';
   document.getElementById('gridProd').innerHTML = prodItems.map(r => makeCard(r, 'prod')).join('');
+
+  // ── orphan 섹션 렌더링 ──
+  const orphanEl = document.getElementById('secOrphan');
+  const orphanGrid = document.getElementById('gridOrphan');
+  if (orphans.length > 0) {
+    orphanEl.style.display = '';
+    document.getElementById('badgeOrphan').textContent = orphans.length;
+    orphanGrid.innerHTML = orphans.map(o => {
+      const parts = o.key.split('|');
+      const chisu = parts[0] || o.key;
+      const jaejil = parts[1] || '';
+      const dateStr = o.date ? String(o.date).slice(0, 10) : '';
+      return `<div style="background:#1e293b;border:2px solid #f59e0b44;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <span style="font-weight:800;font-size:16px">${chisu}</span>
+          <span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#47556933;color:#94a3b8;margin-left:8px">${jaejil}</span>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px">
+            ${o.type} (지시일: ${dateStr})${o.completedDate ? ' / 완료일: ' + o.completedDate : ''}
+          </div>
+          <div style="font-size:10px;color:#f59e0b;margin-top:2px">데이터에서 빠짐 (freq&lt;10 또는 total&gt;1000)</div>
+        </div>
+        <button onclick="removeOrphan('${o.key}','${o.source}')" style="background:#ef444433;border:1px solid #ef4444;color:#f87171;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700">제거</button>
+      </div>`;
+    }).join('');
+  } else {
+    orphanEl.style.display = 'none';
+  }
 
   document.getElementById('badgeActive').textContent = activeItems.length;
   document.getElementById('badgeGrave').textContent = graveItems.length;
@@ -575,6 +648,18 @@ function autoCleanCompleted() {
     saveCompleted();
     showToast(`재고 충족 ${removed}개 → 생산지시 완료에서 자동 제거`);
   }
+}
+
+function removeOrphan(key, source) {
+  if (source === 'graveyard') {
+    delete graveyard[key];
+    save();
+  } else {
+    delete completed[key];
+    saveCompleted();
+  }
+  showToast('추적 불가 품목 제거됨');
+  render();
 }
 
 function resetAll() {
