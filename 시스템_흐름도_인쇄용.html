@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>선생산 시스템 흐름도 v2 (인쇄용)</title>
+<style>
+@page{size:A4;margin:14mm 12mm}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#fff;color:#1a1a1a;font-size:10.5px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+.header{text-align:center;border-bottom:3px solid #1e3a5f;padding-bottom:8px;margin-bottom:14px}
+.header h1{font-size:20px;color:#1e3a5f;margin-bottom:1px}
+.header .sub{font-size:9px;color:#888}
+
+.section{margin-bottom:14px;page-break-inside:avoid}
+.stitle{font-size:13px;font-weight:800;color:#1e3a5f;border-left:4px solid #1e3a5f;padding-left:8px;margin-bottom:8px}
+
+/* ── 비유 ── */
+.analogy{border:2px solid #ddd;border-radius:10px;padding:12px 14px;margin-bottom:14px;background:#fafaff}
+.analogy h3{font-size:11px;text-align:center;margin-bottom:8px;color:#555}
+.a-row{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+.a-card{flex:1;text-align:center;border:1.5px solid #ccc;border-radius:8px;padding:6px 4px;max-width:110px}
+.a-card .emoji{font-size:22px}
+.a-card .nm{font-size:9px;font-weight:800;margin:2px 0}
+.a-card .ds{font-size:7.5px;color:#666;line-height:1.4}
+.a-card.ac1{border-color:#d32f2f}.a-card.ac1 .nm{color:#d32f2f}
+.a-card.ac2{border-color:#757575}.a-card.ac2 .nm{color:#555}
+.a-card.ac3{border-color:#7b1fa2}.a-card.ac3 .nm{color:#7b1fa2}
+.a-card.ac4{border-color:#1565c0}.a-card.ac4 .nm{color:#1565c0}
+.a-card.ac5{border-color:#2e7d32}.a-card.ac5 .nm{color:#2e7d32}
+.a-card.ac6{border-color:#e65100}.a-card.ac6 .nm{color:#e65100}
+.a-sum{font-size:8.5px;color:#666;text-align:center;border-top:1px solid #ddd;padding-top:5px}
+.a-sum b{color:#333}
+
+/* ── 6가지 상태 ── */
+.state-row{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.st{flex:1;border:2px solid #ccc;border-radius:8px;padding:8px 6px;text-align:center;max-width:115px}
+.st .si{font-size:20px}
+.st .sn{font-size:10px;font-weight:800;margin:2px 0}
+.st .sd{font-size:7.5px;color:#666;line-height:1.4}
+.st .sc{font-size:7px;color:#999;margin-top:3px;border-top:1px dashed #ddd;padding-top:3px}
+.s1{border-color:#d32f2f}.s1 .sn{color:#d32f2f}
+.s2{border-color:#757575}.s2 .sn{color:#555}
+.s3{border-color:#7b1fa2}.s3 .sn{color:#7b1fa2}
+.s4{border-color:#1565c0}.s4 .sn{color:#1565c0}
+.s5{border-color:#2e7d32}.s5 .sn{color:#2e7d32}
+.s6{border-color:#e65100}.s6 .sn{color:#e65100}
+
+/* ── 전환 테이블 ── */
+table.tr{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:12px}
+table.tr th{background:#1e3a5f;color:#fff;padding:5px 6px;text-align:left;font-weight:700;font-size:9px}
+table.tr td{padding:5px 6px;border-bottom:1px solid #e0e0e0;vertical-align:top}
+table.tr tr:nth-child(even){background:#f8f8f8}
+.tag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700}
+.tm{background:#fff3cd;color:#856404;border:1px solid #ffc107}
+.ta{background:#d4edda;color:#155724;border:1px solid #28a745}
+.ft{display:flex;align-items:center;gap:3px;font-weight:700;white-space:nowrap;font-size:9.5px}
+.ft .ar{color:#1e3a5f}
+.cr{color:#d32f2f}.cg{color:#555}.cp{color:#7b1fa2}.cb{color:#1565c0}.ck{color:#2e7d32}.co{color:#e65100}
+
+/* ── 안전장치 ── */
+.guard-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.guard{border:1.5px solid #ddd;border-radius:8px;padding:8px 10px}
+.guard .g-icon{font-size:16px;margin-bottom:4px}
+.guard .g-title{font-size:10px;font-weight:800;margin-bottom:4px}
+.guard .g-prob{font-size:8.5px;color:#d32f2f;margin-bottom:3px;line-height:1.5}
+.guard .g-fix{font-size:8.5px;color:#2e7d32;line-height:1.5}
+.g1{border-color:#e65100}.g1 .g-title{color:#e65100}
+.g2{border-color:#7b1fa2}.g2 .g-title{color:#7b1fa2}
+.g3{border-color:#1565c0}.g3 .g-title{color:#1565c0}
+
+/* ── 흐름도 다이어그램 ── */
+.diagram{border:2px solid #1e3a5f;border-radius:10px;padding:14px;margin-bottom:12px;background:#fafafa}
+.diagram h3{font-size:11px;text-align:center;color:#1e3a5f;margin-bottom:10px}
+.d-row{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:4px;flex-wrap:nowrap}
+.d-box{border:2px solid #ccc;border-radius:8px;padding:5px 10px;text-align:center;font-size:9px;font-weight:700;min-width:80px;background:#fff}
+.d-box.db1{border-color:#d32f2f;color:#d32f2f;background:#fff5f5}
+.d-box.db2{border-color:#757575;color:#555;background:#f9f9f9}
+.d-box.db3{border-color:#7b1fa2;color:#7b1fa2;background:#faf5ff}
+.d-box.db4{border-color:#1565c0;color:#1565c0;background:#f0f7ff}
+.d-box.db5{border-color:#2e7d32;color:#2e7d32;background:#f0fff4}
+.d-box.db6{border-color:#e65100;color:#e65100;background:#fff8f0}
+.d-arr{font-size:14px;color:#1e3a5f;padding:0 4px;flex-shrink:0}
+.d-arr-down{text-align:center;font-size:14px;color:#1e3a5f;padding:2px 0}
+.d-label{font-size:7px;color:#888;text-align:center;line-height:1.3}
+.d-side{display:flex;flex-direction:column;align-items:center;gap:2px}
+.d-note{font-size:7.5px;color:#999;padding:1px 5px;border-radius:3px}
+.d-note.manual{background:#fff3cd;color:#856404}
+.d-note.auto{background:#d4edda;color:#155724}
+
+/* ── 사용 순서 ── */
+.steps{display:flex;gap:8px;margin-bottom:12px}
+.step{flex:1;border:1.5px solid #1e3a5f;border-radius:8px;padding:8px;position:relative}
+.step .snum{position:absolute;top:-7px;left:8px;background:#1e3a5f;color:#fff;font-size:8px;font-weight:700;padding:1px 7px;border-radius:8px}
+.step .st-t{font-size:10px;font-weight:800;color:#1e3a5f;margin-top:4px;margin-bottom:3px}
+.step .st-d{font-size:8.5px;color:#555;line-height:1.6}
+.step-arr{display:flex;align-items:center;font-size:14px;color:#1e3a5f;flex-shrink:0}
+
+/* ── 점수 ── */
+.sc-row{display:flex;gap:12px;margin-bottom:8px}
+.sc-box{flex:1;border:1.5px solid #ddd;border-radius:8px;padding:8px}
+.sc-box h4{font-size:10px;margin-bottom:5px}
+.sc-box h4.hb{color:#1565c0}
+.sc-box h4.hr{color:#d32f2f}
+.br{display:flex;align-items:center;gap:5px;margin-bottom:2px;font-size:8.5px}
+.br .bar{flex:1;height:7px;background:#eee;border-radius:3px;overflow:hidden}
+.br .fl{height:100%;border-radius:3px}
+.fb{background:#1565c0}.fr{background:#d32f2f}.fo{background:#e65100}.fy{background:#f9a825}.fg{background:#2e7d32}
+.br .vl{min-width:24px;text-align:right;font-weight:700}
+.sc-ex{text-align:center;border:1.5px solid #1e3a5f;border-radius:8px;padding:6px;font-size:10px}
+.sc-ex b{font-size:13px}
+
+/* ── FAQ ── */
+.faq-g{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fi{border:1px solid #ddd;border-radius:6px;padding:6px 8px}
+.fi .q{font-size:9px;font-weight:700;color:#1e3a5f;margin-bottom:3px}
+.fi .a{font-size:8px;color:#555;line-height:1.6}
+
+.footer{text-align:center;color:#aaa;font-size:7px;margin-top:10px;border-top:1px solid #eee;padding-top:4px}
+.page-break{page-break-before:always}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ PAGE 1 ═══════════════ -->
+<div class="header">
+  <h1>Soltri 선생산 시스템 흐름도 v2</h1>
+  <div class="sub">W/R(Wear Ring) 안전재고 관리 &mdash; start.bat 간섭 시나리오 대응 포함</div>
+</div>
+
+<!-- 비유 -->
+<div class="analogy">
+<h3>&#x1F3E5; 병원에 비유하면?</h3>
+<div class="a-row">
+  <div class="a-card ac1"><div class="emoji">&#x1F6A8;</div><div class="nm">선생산 필요</div><div class="ds">응급실 대기<br>재고 부족!</div></div>
+  <div class="a-card ac2"><div class="emoji">&#x1F3E5;</div><div class="nm">생산지시 중</div><div class="ds">수술실 진입<br>발주 요청함</div></div>
+  <div class="a-card ac3"><div class="emoji">&#x1F489;</div><div class="nm">생산지시 완료</div><div class="ds">수술 끝, 회복실<br>발주 확인됨</div></div>
+  <div class="a-card ac4"><div class="emoji">&#x1F3C3;</div><div class="nm">이미 생산중</div><div class="ds">다른 의사가 치료중<br>7일내 가공이력</div></div>
+  <div class="a-card ac5"><div class="emoji">&#x1F3E0;</div><div class="nm">재고 충분</div><div class="ds">퇴원 완료!<br>재고 OK</div></div>
+  <div class="a-card ac6"><div class="emoji">&#x26A0;</div><div class="nm">추적 불가</div><div class="ds">환자 기록만 남음<br>데이터에서 빠짐</div></div>
+</div>
+<div class="a-sum"><b>핵심:</b> 재고 부족(응급실) &rarr; 발주(수술) &rarr; 확인(회복) &rarr; 재고 충분(퇴원) / 기록 유실 시 "추적 불가"로 경고</div>
+</div>
+
+<!-- 6가지 상태 -->
+<div class="section">
+<div class="stitle">1. 6가지 상태</div>
+<div class="state-row">
+  <div class="st s1"><div class="si">&#x1F6A8;</div><div class="sn">선생산 필요</div><div class="sd">재고 부족<br>발주 대기</div><div class="sc">freq&ge;10<br>재고율&le;30%</div></div>
+  <div class="st s2"><div class="si">&#x1F4CB;</div><div class="sn">생산지시 중</div><div class="sd">발주 요청함<br>추적 중</div><div class="sc">graveyard에<br>날짜 저장</div></div>
+  <div class="st s3"><div class="si">&#x2705;</div><div class="sn">생산지시 완료</div><div class="sd">발주 확인됨<br>입고 대기</div><div class="sc">발주일&ge;지시일<br>또는 수동완료</div></div>
+  <div class="st s4"><div class="si">&#x2699;</div><div class="sn">이미 생산중</div><div class="sd">이미 만드는 중<br>(내가 안 시킴)</div><div class="sc">7일내 가공이력<br>graveyard 아님</div></div>
+  <div class="st s5"><div class="si">&#x1F4E6;</div><div class="sn">재고 충분</div><div class="sd">더 이상<br>안 만들어도 됨</div><div class="sc">재고율&gt;30%<br>이력 archived</div></div>
+  <div class="st s6"><div class="si">&#x26A0;</div><div class="sn">추적 불가</div><div class="sd">데이터에서 빠짐<br>기록만 남음</div><div class="sc">freq&lt;10 또는<br>total&gt;1000</div></div>
+</div>
+</div>
+
+<!-- 흐름도 다이어그램 -->
+<div class="diagram">
+<h3>상태 전환 다이어그램</h3>
+<div class="d-row">
+  <div class="d-box db1">선생산 필요</div>
+  <div class="d-side"><div class="d-arr">&#x27A1;</div><div class="d-note manual">카드 클릭</div></div>
+  <div class="d-box db2">생산지시 중</div>
+  <div class="d-side"><div class="d-arr">&#x27A1;</div><div class="d-note auto">자동/수동</div></div>
+  <div class="d-box db3">생산지시 완료</div>
+  <div class="d-side"><div class="d-arr">&#x27A1;</div><div class="d-note auto">재고&gt;30%</div></div>
+  <div class="d-box db5">재고 충분</div>
+</div>
+<div style="display:flex;justify-content:center;gap:80px;margin:6px 0">
+  <div style="text-align:center">
+    <div style="font-size:10px;color:#555">&#x21A9;</div>
+    <div style="font-size:7px;color:#888">카드 클릭 복귀</div>
+  </div>
+</div>
+<div class="d-row" style="margin-top:4px">
+  <div class="d-box db4">이미 생산중</div>
+  <div class="d-side"><div class="d-arr">&#x27A1;</div><div class="d-note manual">카드 클릭</div></div>
+  <div class="d-box db2">생산지시 중</div>
+  <div style="width:40px"></div>
+  <div class="d-box db6">추적 불가</div>
+  <div class="d-side"><div class="d-arr">&#x27A1;</div><div class="d-note manual">[제거] 클릭</div></div>
+  <div style="font-size:9px;color:#888;display:flex;align-items:center">기록 삭제</div>
+</div>
+<div style="text-align:center;margin-top:6px;font-size:8px;color:#999">
+  &#x2B06; <b>모든 상태</b>에서 재고율 &gt; 30% 되면 자동으로 "재고 충분"으로 이동 (이력은 archived에 보존)
+</div>
+</div>
+
+<!-- 전환 테이블 -->
+<div class="section">
+<div class="stitle">2. 상태 전환 규칙 (8가지)</div>
+<table class="tr">
+<tr><th>#</th><th style="width:24%">From &rarr; To</th><th style="width:8%">방식</th><th style="width:13%">트리거</th><th>상세 설명</th></tr>
+<tr>
+  <td>1</td>
+  <td><div class="ft"><span class="cr">선생산 필요</span><span class="ar">&rarr;</span><span class="cg">생산지시 중</span></div></td>
+  <td><span class="tag tm">수동</span></td><td>카드 클릭</td>
+  <td>발주할 품목 클릭 &rarr; graveyard에 날짜 기록 &rarr; "생산지시 중"으로 이동</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><div class="ft"><span class="cg">생산지시 중</span><span class="ar">&rarr;</span><span class="cp">생산지시 완료</span></div></td>
+  <td><span class="tag ta">자동</span></td><td>start.bat 재실행</td>
+  <td>발주조회.xlsx에서 안전재고 발주일 감지 &rarr; 발주일 &ge; 지시일이면 자동 이동</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><div class="ft"><span class="cg">생산지시 중</span><span class="ar">&rarr;</span><span class="cp">생산지시 완료</span></div></td>
+  <td><span class="tag tm">수동</span></td><td>[완료] 버튼</td>
+  <td>ERP에 안 잡힐 때 (구두 발주 등) 마우스 올려서 [완료] 클릭</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><div class="ft"><span class="cg">생산지시 중</span><span class="ar">&rarr;</span><span class="cr">선생산 필요</span></div></td>
+  <td><span class="tag tm">수동</span></td><td>카드 클릭 (복귀)</td>
+  <td>발주 취소 &rarr; 카드 클릭으로 되돌리기. Undo 버튼으로도 복구 가능</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><div class="ft"><span class="cb">이미 생산중</span><span class="ar">&rarr;</span><span class="cg">생산지시 중</span></div></td>
+  <td><span class="tag tm">수동</span></td><td>카드 클릭</td>
+  <td>7일 가공이력에 잡혔지만 우리 발주 건일 수 있음 &rarr; 클릭해서 추적 시작</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><div class="ft"><span style="color:#333">모든 상태</span><span class="ar">&rarr;</span><span class="ck">재고 충분</span></div></td>
+  <td><span class="tag ta">자동</span></td><td>재고율 &gt; 30%</td>
+  <td>어떤 상태든 재고 기준 초과 시 자동 이동. <b>이력은 archived에 보존됨</b></td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><div class="ft"><span style="color:#333">graveyard/completed</span><span class="ar">&rarr;</span><span class="co">추적 불가</span></div></td>
+  <td><span class="tag ta">자동</span></td><td>ITEMS에서 소실</td>
+  <td>데이터에서 빠진 품목 자동 감지. 경고 표시 + [제거] 버튼 제공</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><div class="ft"><span class="co">추적 불가</span><span class="ar">&rarr;</span><span style="color:#333">(삭제)</span></div></td>
+  <td><span class="tag tm">수동</span></td><td>[제거] 버튼</td>
+  <td>더 이상 필요 없으면 [제거] 클릭 &rarr; graveyard/completed에서 완전 삭제</td>
+</tr>
+</table>
+</div>
+
+<!-- ═══════════════ PAGE 2 ═══════════════ -->
+<div class="page-break"></div>
+<div class="header">
+  <h1>Soltri 선생산 시스템 흐름도 v2</h1>
+  <div class="sub">안전장치 &amp; 사용법 &amp; 점수 산정 &amp; FAQ</div>
+</div>
+
+<!-- 안전장치 3가지 -->
+<div class="section">
+<div class="stitle">3. start.bat 재실행 시 안전장치 (3가지)</div>
+<div class="guard-grid">
+  <div class="guard g1">
+    <div class="g-icon">&#x26A0;</div>
+    <div class="g-title">시나리오 1: 품목 소실</div>
+    <div class="g-prob"><b>문제:</b> 생산지시 중/완료에 넣었는데, 다음 실행 시 freq&lt;10이 되어 data_wr.json에서 빠짐 &rarr; 카드 사라짐</div>
+    <div class="g-fix"><b>대응:</b> "추적 불가" 섹션에 경고 표시. 키/날짜 확인 후 [제거]로 정리 가능</div>
+  </div>
+  <div class="guard g2">
+    <div class="g-icon">&#x1F4BE;</div>
+    <div class="g-title">시나리오 2: 이력 소실</div>
+    <div class="g-prob"><b>문제:</b> 재고 일시 증가로 "재고 충분" 이동 &rarr; completed 삭제 &rarr; 다시 재고 떨어지면 이력 없이 처음부터</div>
+    <div class="g-fix"><b>대응:</b> completed &rarr; 재고 충분 시 archived에 이력 보존 (지시일/완료일/졸업일 기록)</div>
+  </div>
+  <div class="guard g3">
+    <div class="g-icon">&#x1F504;</div>
+    <div class="g-title">시나리오 3: 중복 표시</div>
+    <div class="g-prob"><b>문제:</b> graveyard에 넣었는데 7일 지나면 in_production이 꺼져서 "선생산 필요"에 중복 등장</div>
+    <div class="g-fix"><b>대응:</b> graveyard/completed에 있는 품목은 in_production을 강제 false 처리 &rarr; 중복 방지</div>
+  </div>
+</div>
+</div>
+
+<!-- 사용 순서 -->
+<div class="section">
+<div class="stitle">4. 매일 사용법 (4단계)</div>
+<div class="steps">
+  <div class="step">
+    <div class="snum">STEP 1</div>
+    <div class="st-t">ERP 엑셀 다운로드</div>
+    <div class="st-d">
+      ERP에서 4개 파일 받기:<br>
+      &bull; 라벨조회.xlsx<br>
+      &bull; 완제품재고창고.xlsx<br>
+      &bull; 가공작업조회.xlsx<br>
+      &bull; 발주조회.xlsx<br>
+      &rarr; <b>ERP_downloaded_data/</b>에 저장
+    </div>
+  </div>
+  <div class="step-arr">&#x25B6;</div>
+  <div class="step">
+    <div class="snum">STEP 2</div>
+    <div class="st-t">start.bat 더블클릭</div>
+    <div class="st-d">
+      refresh.py 자동 실행:<br>
+      &bull; 엑셀 분석 + JSON 생성<br>
+      &bull; Google Sheets 업로드<br>
+      &bull; 브라우저에 대시보드 열림<br>
+      &bull; 발주 매칭 자동 처리
+    </div>
+  </div>
+  <div class="step-arr">&#x25B6;</div>
+  <div class="step">
+    <div class="snum">STEP 3</div>
+    <div class="st-t">발주 품목 선택</div>
+    <div class="st-d">
+      대시보드에서:<br>
+      &bull; 카드 클릭 &rarr; 생산지시<br>
+      &bull; [엑셀] 선택 &rarr; 발주서 생성<br>
+      &bull; 실수 시 Undo 가능<br>
+      &bull; 추적불가 품목 확인/정리
+    </div>
+  </div>
+  <div class="step-arr">&#x25B6;</div>
+  <div class="step">
+    <div class="snum">STEP 4</div>
+    <div class="st-t">다음날 반복</div>
+    <div class="st-d">
+      매일 STEP 1~3 반복하면:<br>
+      &bull; 발주 건 &rarr; <b>자동</b> 완료<br>
+      &bull; 재고 찬 건 &rarr; <b>자동</b> 졸업<br>
+      &bull; 이력은 archived에 보존<br>
+      &bull; 시스템이 알아서 관리!
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 점수 산정 -->
+<div class="section">
+<div class="stitle">5. 점수(Score) = 빈도 + 긴급도</div>
+<div class="sc-row">
+  <div class="sc-box">
+    <h4 class="hb">빈도 점수 (최대 50+점)</h4>
+    <div style="font-size:8px;color:#666;margin-bottom:4px">= (주문횟수 / 20) &times; 50</div>
+    <div class="br"><span style="width:36px">5회</span><div class="bar"><div class="fl fb" style="width:12.5%"></div></div><span class="vl">12.5</span></div>
+    <div class="br"><span style="width:36px">10회</span><div class="bar"><div class="fl fb" style="width:25%"></div></div><span class="vl">25.0</span></div>
+    <div class="br"><span style="width:36px">20회</span><div class="bar"><div class="fl fb" style="width:50%"></div></div><span class="vl">50.0</span></div>
+    <div class="br"><span style="width:36px">30회</span><div class="bar"><div class="fl fb" style="width:75%"></div></div><span class="vl">75.0</span></div>
+  </div>
+  <div class="sc-box">
+    <h4 class="hr">긴급도 점수 (최대 50점)</h4>
+    <div style="font-size:8px;color:#666;margin-bottom:4px">재고율(현재고 / 총주문량) 구간별</div>
+    <div class="br"><span style="width:44px">&le; 5%</span><div class="bar"><div class="fl fr" style="width:100%"></div></div><span class="vl">50</span></div>
+    <div class="br"><span style="width:44px">&le; 10%</span><div class="bar"><div class="fl fo" style="width:80%"></div></div><span class="vl">40</span></div>
+    <div class="br"><span style="width:44px">&le; 20%</span><div class="bar"><div class="fl fy" style="width:60%"></div></div><span class="vl">30</span></div>
+    <div class="br"><span style="width:44px">&le; 50%</span><div class="bar"><div class="fl fg" style="width:30%"></div></div><span class="vl">15</span></div>
+    <div class="br"><span style="width:44px">&gt; 50%</span><div class="bar"><div class="fl" style="width:0%"></div></div><span class="vl">0</span></div>
+  </div>
+</div>
+<div class="sc-ex">
+  예시: 주문 10회, 총량 500개, 현재고 25개 (재고율 5%) &rarr;
+  <span style="color:#1565c0"><b>25.0</b></span> + <span style="color:#d32f2f"><b>40</b></span> = <b style="color:#e65100">65.0점</b>
+  &nbsp;&#x2192;&nbsp; 점수 높을수록 먼저 만들어야 함!
+</div>
+</div>
+
+<!-- FAQ -->
+<div class="section">
+<div class="stitle">6. 자주 묻는 질문</div>
+<div class="faq-g">
+  <div class="fi"><div class="q">Q. 실수로 카드를 클릭했어요</div><div class="a">상단 <b>되돌리기</b> 버튼 또는 "생산지시 중" 카드를 다시 클릭하면 복귀됩니다.</div></div>
+  <div class="fi"><div class="q">Q. "추적 불가"는 왜 뜨나요?</div><div class="a">생산지시 중/완료에 넣었던 품목이 다음 start.bat 실행 시 freq&lt;10이 되어 데이터에서 빠진 경우. 확인 후 [제거]로 정리하세요.</div></div>
+  <div class="fi"><div class="q">Q. 재고 충분 갔다가 다시 돌아오면?</div><div class="a">지시일/완료일 이력이 <b>archived</b>에 보존됩니다. "선생산 필요"에 다시 나타나도 이전 이력은 남아있습니다.</div></div>
+  <div class="fi"><div class="q">Q. "이미 생산중"은 뭔가요?</div><div class="a">7일 내 ERP 가공이력이 있는 품목. 내가 발주한 거면 클릭해서 "생산지시 중"으로 옮기세요.</div></div>
+  <div class="fi"><div class="q">Q. 인터넷 없이도 되나요?</div><div class="a">네! data_wr.js 파일 있으면 HTML 더블클릭 가능. Google Sheets 동기화만 안 됩니다.</div></div>
+  <div class="fi"><div class="q">Q. graveyard에 넣었는데 "이미 생산중"에도 뜨나요?</div><div class="a">아니요. graveyard/completed에 있는 품목은 in_production이 무시되어 <b>중복 표시되지 않습니다.</b></div></div>
+</div>
+</div>
+
+<div class="footer">
+  Soltri 선생산 관리 시스템 v2 &mdash; 인쇄용 &mdash; <script>document.write(new Date().toLocaleDateString('ko-KR'))</script>
+</div>
+
+<script>
+window.onload = function() { setTimeout(function() { window.print(); }, 500); };
+</script>
+
+</body>
+</html>

@@ -537,7 +537,7 @@ function render() {
           <div style="font-size:11px;color:#94a3b8;margin-top:4px">
             ${o.type} (지시일: ${dateStr})${o.completedDate ? ' / 완료일: ' + o.completedDate : ''}
           </div>
-          <div style="font-size:10px;color:#f59e0b;margin-top:2px">데이터에서 빠짐 (freq&lt;10 또는 total&gt;1000)</div>
+          <div style="font-size:10px;color:#f59e0b;margin-top:2px">데이터에서 빠짐 (freq&lt;5 또는 total&gt;1000)</div>
         </div>
         <button onclick="removeOrphan('${o.key}','${o.source}')" style="background:#ef444433;border:1px solid #ef4444;color:#f87171;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700">제거</button>
       </div>`;

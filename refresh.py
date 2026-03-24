@@ -14,7 +14,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WORK_DIR = os.path.dirname(SCRIPT_DIR)
 ERP = os.path.join(WORK_DIR, "ERP_downloaded_data")
 OUT = SCRIPT_DIR
-CREDS_PATH = os.path.join(WORK_DIR, "warehouse", "gen-lang-client-0766779209-fd365fc3ce58.json")
+CREDS_PATH = os.path.join(WORK_DIR, "keys", "gen-lang-client-0766779209-5009b1c068c6.json")
 TODAY = datetime.now()
 WEEK_AGO = TODAY - timedelta(days=7)
 
@@ -294,6 +294,7 @@ try:
     import gspread
     from google.oauth2.service_account import Credentials
 
+    SHEET_ID = "1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0"
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
     creds = Credentials.from_service_account_file(CREDS_PATH, scopes=SCOPES)
