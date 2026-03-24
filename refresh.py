@@ -210,7 +210,7 @@ with open(f'{OUT}/data500.json', 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, separators=(',', ':'))
 
 # W/R 핵심 → data_wr.json
-items = [r for r in results if r['pumok'] == 'W/R' and r['freq'] >= 10]
+items = [r for r in results if r['pumok'] == 'W/R' and r['freq'] >= 5]
 items.sort(key=lambda x: x['score'], reverse=True)
 for r in items:
     r['key'] = f"{r['chisu']}|{r['jaejil']}"
