@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frequency 프로젝트 - 데이터 소스 역할 설명</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 48px;
+    font-size: 0.95rem;
+  }
+
+  /* ── Flow Diagram ── */
+  .flow-section {
+    margin-bottom: 60px;
+  }
+  .flow-title {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    width: 180px;
+    padding: 20px 16px;
+    border-radius: 16px;
+    text-align: center;
+    position: relative;
+  }
+  .flow-node .icon { font-size: 2rem; margin-bottom: 8px; }
+  .flow-node .label { font-weight: 700; font-size: 0.95rem; }
+  .flow-node .sub { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+
+  .flow-arrow {
+    font-size: 1.8rem;
+    color: #475569;
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .fn-order { background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.3); }
+  .fn-stock { background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); }
+  .fn-prod  { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); }
+  .fn-po    { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); }
+  .fn-invoice { background: rgba(192,132,252,0.12); border: 1px solid rgba(192,132,252,0.3); }
+  .fn-analysis { background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(192,132,252,0.15)); border: 1px solid rgba(129,140,248,0.4); }
+
+  /* ── Cards Grid ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .card {
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .card-order  { background: #1e293b; border: 1px solid rgba(56,189,248,0.2); }
+  .card-order::before { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+
+  .card-stock  { background: #1e293b; border: 1px solid rgba(52,211,153,0.2); }
+  .card-stock::before { background: linear-gradient(90deg, #34d399, #10b981); }
+
+  .card-prod   { background: #1e293b; border: 1px solid rgba(251,191,36,0.2); }
+  .card-prod::before { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+
+  .card-po     { background: #1e293b; border: 1px solid rgba(248,113,113,0.2); }
+  .card-po::before { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+  .card-invoice { background: #1e293b; border: 1px solid rgba(192,132,252,0.2); }
+  .card-invoice::before { background: linear-gradient(90deg, #c084fc, #a855f7); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+  .ci-order  { background: rgba(56,189,248,0.15); color: #38bdf8; }
+  .ci-stock  { background: rgba(52,211,153,0.15); color: #34d399; }
+  .ci-prod   { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .ci-po     { background: rgba(248,113,113,0.15); color: #f87171; }
+  .ci-invoice{ background: rgba(192,132,252,0.15); color: #c084fc; }
+
+  .card-name { font-size: 1.1rem; font-weight: 700; }
+  .card-file { font-size: 0.8rem; color: #64748b; font-family: 'Consolas', monospace; }
+
+  .card-desc {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tag {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .tag-blue   { color: #38bdf8; border-color: rgba(56,189,248,0.3); }
+  .tag-green  { color: #34d399; border-color: rgba(52,211,153,0.3); }
+  .tag-yellow { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+  .tag-red    { color: #f87171; border-color: rgba(248,113,113,0.3); }
+  .tag-purple { color: #c084fc; border-color: rgba(192,132,252,0.3); }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 12px;
+  }
+  .status-active {
+    background: rgba(52,211,153,0.12);
+    color: #34d399;
+    border: 1px solid rgba(52,211,153,0.3);
+  }
+  .status-pending {
+    background: rgba(251,191,36,0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(251,191,36,0.3);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: #34d399; }
+  .dot-yellow { background: #fbbf24; }
+
+  /* ── Data Schema Table ── */
+  .schema-section {
+    margin-bottom: 48px;
+  }
+  .schema-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 3px solid #818cf8;
+  }
+  .schema-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .schema-table th {
+    background: #334155;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .schema-table td {
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .schema-table tr:last-child td { border-bottom: none; }
+  .col-name { color: #38bdf8; font-family: 'Consolas', monospace; font-weight: 600; }
+
+  /* ── Relationship Diagram ── */
+  .rel-section {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 48px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .rel-title {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 24px;
+    color: #e2e8f0;
+  }
+  .rel-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .rel-box {
+    text-align: center;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+  }
+  .rel-arrow {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+  .rel-arrow .arr { font-size: 1.4rem; display: block; color: #475569; }
+
+  .rel-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .rel-item {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    text-align: center;
+    min-width: 140px;
+  }
+  .rel-connector {
+    color: #475569;
+    font-size: 1.4rem;
+  }
+
+  /* ── Summary Box ── */
+  .summary {
+    background: linear-gradient(135deg, rgba(56,189,248,0.08), rgba(192,132,252,0.08));
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+  }
+  .summary h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: #818cf8;
+  }
+  .summary p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #94a3b8;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .cards { grid-template-columns: 1fr; }
+    .rel-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Frequency 프로젝트 - 데이터 소스 맵</h1>
+  <p class="subtitle">Soltri 재고 분석 시스템 | 각 엑셀 파일의 역할과 데이터 흐름</p>
+
+  <!-- ── Flow Diagram ── -->
+  <div class="flow-section">
+    <div class="flow-title">Data Flow</div>
+    <div class="flow">
+      <div class="flow-node fn-order">
+        <div class="icon">📋</div>
+        <div class="label">라벨 조회</div>
+        <div class="sub">주문 이력</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-prod">
+        <div class="icon">⚙️</div>
+        <div class="label">가공작업조회</div>
+        <div class="sub">생산 이력</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-stock">
+        <div class="icon">📦</div>
+        <div class="label">완제품 재고창고</div>
+        <div class="sub">현재 재고</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-analysis">
+        <div class="icon">📊</div>
+        <div class="label">빈도 분석</div>
+        <div class="sub">패턴 탐지</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-po">
+        <div class="icon">🔔</div>
+        <div class="label">발주조회</div>
+        <div class="sub">발주 이력</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-invoice">
+        <div class="icon">📄</div>
+        <div class="label">ERP 발주저장</div>
+        <div class="sub">인보이스 출력</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Detail Cards ── -->
+  <div class="cards">
+
+    <!-- 1. 라벨 조회 -->
+    <div class="card card-order">
+      <div class="card-header">
+        <div class="card-icon ci-order">📋</div>
+        <div>
+          <div class="card-name">라벨 조회.xlsx</div>
+          <div class="card-file">주문 이력 전체 (거래처·치수·수량)</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        거래처별 <strong>주문서(라벨)</strong>를 시트 단위로 관리합니다.<br>
+        각 시트에는 거래처명, 주문번호, 품명, 규격(내경·외경·높이), 수량, 단가, 금액, 납기일 등이 기록되어 있습니다.<br>
+        <strong>7개 시트</strong> — 거래처별 주문 이력을 시계열로 보관합니다.
+      </div>
+      <div class="card-meta">
+        <span class="tag tag-blue">7개 시트(거래처별)</span>
+        <span class="tag tag-blue">주문서 양식</span>
+        <span class="tag tag-blue">품명·규격·수량·단가</span>
+      </div>
+      <div class="status-badge status-active"><span class="dot dot-green"></span>확인 완료</div>
+    </div>
+
+    <!-- 2. 완제품 재고창고 -->
+    <div class="card card-stock">
+      <div class="card-header">
+        <div class="card-icon ci-stock">📦</div>
+        <div>
+          <div class="card-name">완제품 재고창고.xlsx</div>
+          <div class="card-file">현재 창고 재고 현황</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        완제품 창고의 <strong>전체 재고 현황</strong>을 치수(내경·외경·사용·높이)별로 관리합니다.<br>
+        재질, 품종, 거래업체, <strong>현재재고·안전재고</strong>, 안전재고량 컬럼으로 구성되어 있어<br>
+        재고 부족 품목을 즉시 파악할 수 있습니다.
+      </div>
+      <div class="card-meta">
+        <span class="tag tag-green">2,142행 (품목)</span>
+        <span class="tag tag-green">11개 컬럼</span>
+        <span class="tag tag-green">내경·외경·높이·재질</span>
+        <span class="tag tag-green">현재재고 vs 안전재고</span>
+      </div>
+      <div class="status-badge status-active"><span class="dot dot-green"></span>확인 완료</div>
+    </div>
+
+    <!-- 3. 가공작업조회 -->
+    <div class="card card-prod">
+      <div class="card-header">
+        <div class="card-icon ci-prod">⚙️</div>
+        <div>
+          <div class="card-name">가공작업조회.xlsx</div>
+          <div class="card-file">최근 7일 생산 이력</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        CNC 가공 라인의 <strong>최근 7일간 생산 실적</strong>을 기록합니다.<br>
+        어떤 품목이 언제, 얼마나 생산되었는지 추적하여<br>
+        생산 속도와 재고 보충 타이밍을 분석하는 데 활용됩니다.
+      </div>
+      <div class="card-meta">
+        <span class="tag tag-yellow">생산 실적</span>
+        <span class="tag tag-yellow">7일 롤링</span>
+        <span class="tag tag-yellow">품목별 생산량</span>
+      </div>
+      <div class="status-badge status-pending"><span class="dot dot-yellow"></span>파일 미등록</div>
+    </div>
+
+    <!-- 4. 발주조회 -->
+    <div class="card card-po">
+      <div class="card-header">
+        <div class="card-icon ci-po">🔔</div>
+        <div>
+          <div class="card-name">발주조회.xlsx</div>
+          <div class="card-file">안전재고 발주 이력</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        안전재고 기준 이하로 떨어진 품목에 대한 <strong>발주 이력</strong>을 관리합니다.<br>
+        발주 일자, 발주 수량, 입고 예정일 등을 추적하여<br>
+        중복 발주 방지 및 입고 일정 관리에 활용됩니다.
+      </div>
+      <div class="card-meta">
+        <span class="tag tag-red">발주 이력</span>
+        <span class="tag tag-red">안전재고 기반</span>
+        <span class="tag tag-red">입고 추적</span>
+      </div>
+      <div class="status-badge status-pending"><span class="dot dot-yellow"></span>파일 미등록</div>
+    </div>
+
+    <!-- 5. ERP 발주저장 -->
+    <div class="card card-invoice">
+      <div class="card-header">
+        <div class="card-icon ci-invoice">📄</div>
+        <div>
+          <div class="card-name">ERP_발주저장_260319.xlsx</div>
+          <div class="card-file">PROFORMA INVOICE 양식</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        발주 확정 후 거래처에 전달하는 <strong>견적서/인보이스(PROFORMA INVOICE)</strong> 양식입니다.<br>
+        Soltri 회사 정보, 거래처 정보, 품목 리스트, 금액, VAT 등이<br>
+        3개 시트(거래처별)로 구성되어 있습니다.
+      </div>
+      <div class="card-meta">
+        <span class="tag tag-purple">3개 시트</span>
+        <span class="tag tag-purple">인보이스 템플릿</span>
+        <span class="tag tag-purple">거래처·품목·금액</span>
+      </div>
+      <div class="status-badge status-active"><span class="dot dot-green"></span>확인 완료</div>
+    </div>
+
+  </div>
+
+  <!-- ── Column Schema ── -->
+  <div class="schema-section">
+    <div class="schema-title">완제품 재고창고.xlsx — 컬럼 구조 (2,142행)</div>
+    <table class="schema-table">
+      <thead>
+        <tr>
+          <th>컬럼</th>
+          <th>설명</th>
+          <th>예시 값</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="col-name">내경</td><td>제품 내경 (mm)</td><td>5.4, 31.75, 100</td></tr>
+        <tr><td class="col-name">외경</td><td>제품 외경 (mm)</td><td>2.5, 38.1, 176.66</td></tr>
+        <tr><td class="col-name">사용</td><td>사용 여부/용도</td><td>0</td></tr>
+        <tr><td class="col-name">높이</td><td>제품 높이 (mm)</td><td>10, 95, 96</td></tr>
+        <tr><td class="col-name">재질</td><td>원재료 재질 코드</td><td>RS20, RS40, M/NW, CN10</td></tr>
+        <tr><td class="col-name">품종</td><td>제품 유형</td><td>Strip, Bush, Mostuf, W/R, TUBE</td></tr>
+        <tr><td class="col-name">거래업체</td><td>주 거래처</td><td>(빈 값 다수)</td></tr>
+        <tr><td class="col-name">현재재고</td><td>현재 보유 수량</td><td>0 ~ 35</td></tr>
+        <tr><td class="col-name">안전재고</td><td>안전재고 보유 수량</td><td>0</td></tr>
+        <tr><td class="col-name">안전재고량</td><td>안전재고 기준량</td><td>100</td></tr>
+        <tr><td class="col-name">비고</td><td>메모</td><td>(대부분 빈 값)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schema-section">
+    <div class="schema-title">라벨 조회.xlsx — 시트별 주문 내역 (7개 거래처)</div>
+    <table class="schema-table">
+      <thead>
+        <tr>
+          <th>필드</th>
+          <th>설명</th>
+          <th>예시 값</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="col-name">주문번호</td><td>주문 고유번호</td><td>2026-02-09-1, 2026-03-06-1</td></tr>
+        <tr><td class="col-name">거래처명</td><td>고객사 이름</td><td>중앙유압기계공업사 등</td></tr>
+        <tr><td class="col-name">작성일</td><td>주문서 작성 날짜</td><td>2026-02-09, 2026-03-06</td></tr>
+        <tr><td class="col-name">납기</td><td>납품 예정일</td><td>2026-02-11, 2026-03-24</td></tr>
+        <tr><td class="col-name">품명</td><td>제품명</td><td>PHENOLITE</td></tr>
+        <tr><td class="col-name">규격</td><td>규격 코드</td><td>SI-3650</td></tr>
+        <tr><td class="col-name">단위</td><td>수량 단위</td><td>kg, EA</td></tr>
+        <tr><td class="col-name">수량 / 단가 / 금액</td><td>주문 상세</td><td>450kg × 2,450원 = 1,102,500원</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Relationship Diagram ── -->
+  <div class="rel-section">
+    <div class="rel-title">데이터 연관 관계</div>
+
+    <div class="rel-row">
+      <div class="rel-item fn-order">
+        <strong>라벨 조회</strong><br>
+        <small>주문 → 품목·치수·수량</small>
+      </div>
+      <div class="rel-connector">──▶</div>
+      <div class="rel-item fn-analysis">
+        <strong>빈도 분석 엔진</strong><br>
+        <small>반복 주문 패턴 탐지</small>
+      </div>
+      <div class="rel-connector">──▶</div>
+      <div class="rel-item fn-po">
+        <strong>안전재고 발주</strong><br>
+        <small>선제적 재고 생산 추천</small>
+      </div>
+    </div>
+
+    <div class="rel-row">
+      <div class="rel-item fn-stock">
+        <strong>완제품 재고창고</strong><br>
+        <small>현재 재고 ↔ 안전재고</small>
+      </div>
+      <div class="rel-connector">──▶</div>
+      <div class="rel-item fn-analysis">
+        <strong>재고 부족 판별</strong><br>
+        <small>현재재고 &lt; 안전재고량?</small>
+      </div>
+      <div class="rel-connector">──▶</div>
+      <div class="rel-item fn-invoice">
+        <strong>ERP 발주저장</strong><br>
+        <small>인보이스 자동 생성</small>
+      </div>
+    </div>
+
+    <div class="rel-row">
+      <div class="rel-item fn-prod">
+        <strong>가공작업조회</strong><br>
+        <small>7일 생산 실적</small>
+      </div>
+      <div class="rel-connector">──▶</div>
+      <div class="rel-item fn-stock" style="opacity:0.6;">
+        <strong>재고 갱신</strong><br>
+        <small>생산완료 → 재고 증가</small>
+      </div>
+      <div class="rel-connector">──▶</div>
+      <div class="rel-item fn-analysis" style="opacity:0.6;">
+        <strong>생산 속도 분석</strong><br>
+        <small>보충 타이밍 예측</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Summary ── -->
+  <div class="summary">
+    <h3>프로젝트 핵심 목표</h3>
+    <p>
+      <strong>주문 데이터(라벨 조회)</strong>에서 고빈도 반복 품목을 탐지하고,<br>
+      <strong>현재 재고(완제품 재고창고)</strong>와 대조하여 부족 품목을 식별한 뒤,<br>
+      <strong>생산 이력(가공작업조회)</strong>을 참고해 최적 발주 타이밍을 결정하고,<br>
+      <strong>발주서(ERP 발주저장)</strong>를 자동 생성하여 선제적 재고 관리를 실현합니다.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

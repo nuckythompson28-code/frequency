@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Frequency 설계도 — Soltri</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh;padding:32px 24px}
+h1{font-size:22px;font-weight:800;color:#f8fafc;margin-bottom:4px}
+h1 em{font-style:normal;color:#3b82f6}
+.meta{font-size:12px;color:#475569;margin-bottom:36px}
+
+/* ── 섹션 타이틀 ── */
+.sec-title{font-size:13px;font-weight:700;color:#64748b;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;margin-top:36px}
+
+/* ── 데이터 흐름 ── */
+.flow{display:flex;align-items:stretch;gap:0}
+.flow-col{display:flex;flex-direction:column;gap:8px;min-width:170px}
+.flow-arrow{display:flex;align-items:center;padding:0 10px;color:#334155;font-size:22px;flex-shrink:0}
+.flow-box{background:#1e293b;border:1.5px solid #334155;border-radius:10px;padding:12px 14px}
+.flow-box.erp{border-color:#7c3aed}
+.flow-box.py{border-color:#0ea5e9;min-width:200px}
+.flow-box.json{border-color:#f59e0b}
+.flow-box.dash{border-color:#3b82f6;min-width:220px}
+.flow-box.out{border-color:#22c55e}
+.flow-label{font-size:10px;font-weight:700;letter-spacing:.06em;margin-bottom:6px}
+.erp .flow-label{color:#a78bfa}
+.py .flow-label{color:#38bdf8}
+.json .flow-label{color:#fbbf24}
+.dash .flow-label{color:#60a5fa}
+.out .flow-label{color:#4ade80}
+.flow-item{font-size:11px;color:#94a3b8;padding:4px 0;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:6px}
+.flow-item:last-child{border-bottom:none}
+.flow-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-purple{background:#7c3aed}
+.dot-blue{background:#3b82f6}
+.dot-yellow{background:#f59e0b}
+.dot-green{background:#22c55e}
+.dot-red{background:#ef4444}
+.flow-sub{font-size:10px;color:#475569;margin-left:12px}
+
+/* ── 파일 구조 ── */
+.file-tree{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:16px 20px;font-size:12px;font-family:'Consolas','Courier New',monospace;line-height:2}
+.ft-dir{color:#60a5fa;font-weight:700}
+.ft-main{color:#f8fafc;font-weight:600}
+.ft-py{color:#a78bfa}
+.ft-json{color:#fbbf24}
+.ft-bat{color:#34d399}
+.ft-ref{color:#fb923c}
+.ft-dim{color:#374151}
+.ft-note{color:#475569;font-style:italic}
+
+/* ── 점수 로직 ── */
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.score-box{background:#1e293b;border:1.5px solid #334155;border-radius:10px;padding:16px}
+.score-box h3{font-size:12px;font-weight:700;color:#64748b;margin-bottom:12px;letter-spacing:.05em}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #1a2535;font-size:12px}
+.score-row:last-child{border-bottom:none}
+.score-row .k{color:#94a3b8}
+.score-row .v{font-weight:700;color:#3b82f6;font-size:13px}
+.score-row .v.red{color:#ef4444}
+.score-row .v.yellow{color:#f59e0b}
+.score-row .v.green{color:#22c55e}
+.score-row .v.dim{color:#475569}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;margin-left:6px}
+.tag-exclude{background:#ef444422;color:#f87171}
+
+/* ── 대시보드 섹션 ── */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dash-sec{border-radius:10px;padding:14px;border:1.5px solid}
+.dash-sec.active{border-color:#ef4444;background:#ef444410}
+.dash-sec.prod{border-color:#3b82f6;background:#3b82f610}
+.dash-sec.stocked{border-color:#22c55e;background:#22c55e10}
+.dash-sec.grave{border-color:#64748b;background:#64748b10}
+.dash-sec h3{font-size:12px;font-weight:800;margin-bottom:8px}
+.dash-sec.active h3{color:#f87171}
+.dash-sec.prod h3{color:#60a5fa}
+.dash-sec.stocked h3{color:#4ade80}
+.dash-sec.grave h3{color:#94a3b8}
+.dash-cond{font-size:11px;color:#64748b;line-height:1.7}
+.dash-cond code{background:#0f172a;padding:1px 5px;border-radius:3px;font-size:10px;color:#94a3b8}
+
+/* ── 필터 패널 ── */
+.filter-viz{background:#1a2540;border:1.5px solid #334155;border-radius:10px;padding:16px 20px}
+.filter-row{display:flex;gap:24px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filter-item{display:flex;flex-direction:column;gap:4px}
+.filter-item label{font-size:10px;color:#64748b;font-weight:700}
+.filter-bar-viz{height:8px;background:#334155;border-radius:4px;position:relative;width:120px}
+.filter-bar-fill{height:100%;border-radius:4px;background:#3b82f6}
+.filter-val{font-size:12px;font-weight:700;color:#3b82f6;margin-top:2px}
+.filter-note{font-size:11px;color:#475569;margin-top:8px;line-height:1.7}
+.filter-note strong{color:#94a3b8}
+
+/* ── 엑셀 구조 ── */
+.xlsx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.xlsx-sheet{background:#1e293b;border:1.5px solid #334155;border-radius:10px;padding:14px}
+.xlsx-sheet h3{font-size:12px;font-weight:800;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #334155}
+.sheet1 h3{color:#f59e0b}
+.sheet2 h3{color:#3b82f6}
+.sheet3 h3{color:#22c55e}
+.xlsx-row{font-size:11px;color:#64748b;padding:3px 0;display:flex;gap:6px;align-items:baseline}
+.xlsx-row .rn{color:#334155;font-size:10px;min-width:28px}
+.xlsx-row .rv{color:#94a3b8}
+.xlsx-row .yellow{background:#f59e0b22;color:#fbbf24;padding:0 4px;border-radius:3px;font-size:10px}
+
+/* ── 컬럼 메모 ── */
+.col-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.col-table{background:#111827;border:1px solid #1f2937;border-radius:10px;overflow:hidden}
+.col-table h3{font-size:11px;font-weight:700;color:#64748b;padding:10px 14px;background:#0f172a;letter-spacing:.05em}
+.col-table table{width:100%;border-collapse:collapse;font-size:11px}
+.col-table td{padding:6px 14px;border-bottom:1px solid #111827;color:#94a3b8}
+.col-table td:first-child{color:#475569;width:36px;font-family:monospace}
+.col-table td.hi{color:#fbbf24;font-weight:700}
+.col-table tr:last-child td{border-bottom:none}
+
+/* ── 실행 흐름 ── */
+.run-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.run-step{background:#1e293b;border:1.5px solid #334155;border-radius:8px;padding:10px 16px;font-size:12px;text-align:center;min-width:130px}
+.run-step .num{font-size:18px;font-weight:900;color:#3b82f6;display:block;margin-bottom:2px}
+.run-step .txt{color:#94a3b8}
+.run-arrow{color:#334155;font-size:20px;padding:0 6px}
+
+.divider{height:1px;background:#1e293b;margin:32px 0}
+</style>
+</head>
+<body>
+
+<h1><em>Frequency</em> 설계도</h1>
+<div class="meta">Soltri 선생산 관리 시스템 &nbsp;|&nbsp; 최종 업데이트: 2026-03-20</div>
+
+<!-- ═══ 데이터 흐름 ═══ -->
+<div class="sec-title">데이터 흐름</div>
+<div class="flow">
+
+  <!-- ERP 입력 -->
+  <div class="flow-col">
+    <div class="flow-box erp">
+      <div class="flow-label">ERP 다운로드</div>
+      <div class="flow-item"><span class="dot dot-purple"></span>라벨조회.xlsx</div>
+      <div class="flow-sub">주문 빈도·수량·거래처</div>
+      <div class="flow-item"><span class="dot dot-purple"></span>완제품재고창고.xlsx</div>
+      <div class="flow-sub">현재 재고 수량</div>
+      <div class="flow-item"><span class="dot dot-purple"></span>가공작업조회.xlsx</div>
+      <div class="flow-sub">최근 7일 생산이력</div>
+      <div class="flow-item"><span class="dot dot-purple"></span>발주조회.xlsx</div>
+      <div class="flow-sub">최근 발주일·수량</div>
+    </div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- refresh.py -->
+  <div class="flow-col">
+    <div class="flow-box py">
+      <div class="flow-label">refresh.py</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>HYUNDAI CN 제외</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>안전재고 주문 제외</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>freq·qty·stock 집계</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>점수 산정 (최대 100)</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>발주조회 regex 매칭</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>Google Sheets 업로드</div>
+    </div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- JSON -->
+  <div class="flow-col">
+    <div class="flow-box json">
+      <div class="flow-label">JSON 생성</div>
+      <div class="flow-item"><span class="dot dot-yellow"></span>data500.json</div>
+      <div class="flow-sub">전체 품목 (freq≥3, qty≤500)</div>
+      <div class="flow-item" style="margin-top:6px"><span class="dot dot-yellow"></span>data_wr.json</div>
+      <div class="flow-sub">W/R만 (freq≥10) + 발주일</div>
+    </div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- 대시보드 -->
+  <div class="flow-col">
+    <div class="flow-box dash">
+      <div class="flow-label">index.html (localhost:8585)</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>ITEMS[] 로드</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>필터 적용 (클라이언트)</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>카드 렌더링 (4섹션)</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>생산지시 → localStorage</div>
+      <div class="flow-item"><span class="dot dot-blue"></span>엑셀 선택 → 다운로드</div>
+    </div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- 출력 -->
+  <div class="flow-col">
+    <div class="flow-box out">
+      <div class="flow-label">출력</div>
+      <div class="flow-item"><span class="dot dot-green"></span>발주저장 양식 .xlsx</div>
+      <div class="flow-sub">Sheet1 · 변환시트 · 정의값</div>
+      <div class="flow-item" style="margin-top:6px"><span class="dot dot-green"></span>Google Sheets</div>
+      <div class="flow-sub">선생산리스트 · 주문이력</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ 파일 구조 ═══ -->
+<div class="sec-title">파일 구조</div>
+<div class="file-tree">
+<span class="ft-dir">frequency/</span><br>
+&nbsp;&nbsp;├── <span class="ft-main">index.html</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-note">← 메인 대시보드 (브라우저)</span><br>
+&nbsp;&nbsp;├── <span class="ft-py">refresh.py</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-note">← ERP 엑셀 → JSON 변환</span><br>
+&nbsp;&nbsp;├── <span class="ft-bat">start.bat</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-note">← refresh.py 실행 → 서버 8585</span><br>
+&nbsp;&nbsp;├── <span class="ft-py">make_invoice_v2.py</span> &nbsp;<span class="ft-note">← PROFORMA INVOICE 단독 생성</span><br>
+&nbsp;&nbsp;├── <span class="ft-json">data500.json</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-note">← 전체 고빈도 품목 분석결과</span><br>
+&nbsp;&nbsp;├── <span class="ft-json">data_wr.json</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-note">← W/R 핵심 품목 (대시보드 소스)</span><br>
+&nbsp;&nbsp;├── <span class="ft-ref">ERP 발주저장 양식.xls</span> <span class="ft-note">← 엑셀 생성 참조 양식</span><br>
+&nbsp;&nbsp;├── <span class="ft-dim">CLAUDE.md</span><br>
+&nbsp;&nbsp;└── <span class="ft-dim">archive/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-note">← 구버전 보관</span>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ 점수 로직 + 분류 기준 ═══ -->
+<div class="sec-title">분석 로직</div>
+<div class="score-grid">
+
+  <div class="score-box">
+    <h3>📊 점수 산정 (refresh.py)</h3>
+    <div class="score-row"><span class="k">주문빈도 (freq/20 × 50)</span><span class="v">최대 50점</span></div>
+    <div class="score-row"><span class="k">재고율 0 ~ 5%</span><span class="v red">+50점</span></div>
+    <div class="score-row"><span class="k">재고율 5 ~ 10%</span><span class="v red">+40점</span></div>
+    <div class="score-row"><span class="k">재고율 10 ~ 20%</span><span class="v yellow">+30점</span></div>
+    <div class="score-row"><span class="k">재고율 20 ~ 50%</span><span class="v yellow">+15점</span></div>
+    <div class="score-row"><span class="k">재고율 50% 초과</span><span class="v dim">+0점</span></div>
+    <div class="score-row" style="margin-top:8px">
+      <span class="k">HYUNDAI CN <span class="tag tag-exclude">제외</span></span>
+    </div>
+    <div class="score-row">
+      <span class="k">안전재고 주문번호 <span class="tag tag-exclude">제외</span></span>
+    </div>
+  </div>
+
+  <div class="score-box">
+    <h3>🗂 in_production 판정 (JSON 고정값)</h3>
+    <div class="score-row"><span class="k">7일 내 가공작업 이력</span><span class="v" style="color:#3b82f6">→ True</span></div>
+    <div class="score-row"><span class="k">재고율 30% 초과</span><span class="v" style="color:#3b82f6">→ True</span></div>
+    <div class="score-row" style="margin-top:8px;padding-top:8px;border-top:1px solid #1a2535">
+      <span class="k" style="color:#ef4444;font-size:11px">⚠ 대시보드 필터로 변경 불가 → refresh.py 재실행 필요</span>
+    </div>
+    <div class="score-row" style="margin-top:4px">
+      <span class="k">발주조회 치수 파싱</span>
+    </div>
+    <div style="font-family:monospace;font-size:11px;color:#7c3aed;background:#0f172a;padding:6px 10px;border-radius:6px;margin-top:6px">
+      D([\d.]+)D([\d.]+)W([\w.]+)<br>
+      <span style="color:#475569">→ frozenset 매칭 → 최근발주일·수량</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ 대시보드 4섹션 ═══ -->
+<div class="sec-title">대시보드 카드 분류</div>
+<div class="dash-grid">
+  <div class="dash-sec active">
+    <h3>🔴 선생산 필요</h3>
+    <div class="dash-cond">
+      <code>in_production = False</code><br>
+      <code>isStocked = False</code><br>
+      <code>not in graveyard</code><br>
+      + 필터 조건 적용<br><br>
+      클릭 → 생산지시 완료
+    </div>
+  </div>
+  <div class="dash-sec prod">
+    <h3>🔵 이미 생산중</h3>
+    <div class="dash-cond">
+      <code>in_production = True</code><br>
+      <code>isStocked = False</code><br>
+      <code>not in graveyard</code><br><br>
+      필터 슬라이더 영향 없음<br>
+      JSON 값이 결정
+    </div>
+  </div>
+  <div class="dash-sec stocked">
+    <h3>🟢 재고 충분</h3>
+    <div class="dash-cond">
+      <code>stock_ratio > filterStock</code><br>
+      <code>not in graveyard</code><br><br>
+      재고율 슬라이더로<br>
+      기준값 조절 가능
+    </div>
+  </div>
+  <div class="dash-sec grave">
+    <h3>⚫ 생산지시 완료</h3>
+    <div class="dash-cond">
+      <code>key in graveyard</code><br>
+      <code>localStorage 저장</code><br><br>
+      클릭 → 복귀<br>
+      재고 변동 시 자동 복귀
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ 필터 패널 ═══ -->
+<div class="sec-title">대시보드 필터 (클라이언트 전용 — JSON 불변)</div>
+<div class="filter-viz">
+  <div class="filter-row">
+    <div class="filter-item">
+      <label>주문횟수 ≥</label>
+      <div class="filter-bar-viz"><div class="filter-bar-fill" style="width:20%"></div></div>
+      <div class="filter-val">10회</div>
+    </div>
+    <div class="filter-item">
+      <label>재고율 ≤</label>
+      <div class="filter-bar-viz"><div class="filter-bar-fill" style="width:30%"></div></div>
+      <div class="filter-val">30%</div>
+    </div>
+    <div class="filter-item">
+      <label>점수 ≥</label>
+      <div class="filter-bar-viz"><div class="filter-bar-fill" style="width:0%"></div></div>
+      <div class="filter-val">0점</div>
+    </div>
+    <div class="filter-item">
+      <label>총량 ≤</label>
+      <div class="filter-bar-viz"><div class="filter-bar-fill" style="width:50%"></div></div>
+      <div class="filter-val">500개</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div style="background:#0f2a1a;border:1px solid #22c55e;color:#4ade80;font-size:11px;padding:6px 14px;border-radius:6px;font-weight:700">전체 선택 →엑셀</div>
+      <div style="background:#2a1f0f;border:1px solid #f59e0b;color:#fbbf24;font-size:11px;padding:6px 14px;border-radius:6px;font-weight:700">선택 해제</div>
+    </div>
+  </div>
+  <div class="filter-note">
+    <strong>동작 원리:</strong> 슬라이더 변경 → ITEMS[] 재필터링 → 화면 리렌더 (JSON 파일 무변경)<br>
+    <strong>이미 생산중(in_production=True)</strong> 품목은 어떤 필터 조건에서도 선생산 필요 섹션에 올라오지 않음<br>
+    <strong>전체 선택</strong>은 현재 필터를 통과한 "선생산 필요" 품목만 엑셀 선택에 추가
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ 엑셀 출력 구조 ═══ -->
+<div class="sec-title">엑셀 출력 구조 (SheetJS xlsx-0.20.3)</div>
+<div class="xlsx-grid">
+  <div class="xlsx-sheet sheet1">
+    <h3>Sheet1 — PROFORMA INVOICE</h3>
+    <div class="xlsx-row"><span class="rn">R1</span><span class="rv">PROFORMA INVOICE (A:I 병합)</span></div>
+    <div class="xlsx-row"><span class="rn">R2</span><span class="rv">SHIPPER / NO & DATE OF INVOICE</span></div>
+    <div class="xlsx-row"><span class="rn">R3-5</span><span class="rv">SOLTRI CORPORATION 주소</span></div>
+    <div class="xlsx-row"><span class="rn">R6</span><span class="rv">업체명 / 발주일(수정)</span></div>
+    <div class="xlsx-row"><span class="rn">R7</span><span class="rv">WIPRO &nbsp;<span class="yellow">오늘날짜</span></span></div>
+    <div class="xlsx-row"><span class="rn">R14</span><span class="rv">VESSEL &amp; VOY / 발송일자 / <span class="yellow">안전재고</span></span></div>
+    <div class="xlsx-row"><span class="rn">R15</span><span class="rv">납기일자(수정) &nbsp;<span class="yellow">영업일+5</span>&nbsp; / ETA</span></div>
+    <div class="xlsx-row"><span class="rn">R17</span><span class="rv">테이블 헤더 (NO/치수/재질/수량...)</span></div>
+    <div class="xlsx-row"><span class="rn">R19+</span><span class="rv">품목 데이터 (수량 일의자리 올림)</span></div>
+  </div>
+  <div class="xlsx-sheet sheet2">
+    <h3>변환시트 — ERP 업로드용 22열</h3>
+    <div class="xlsx-row"><span class="rn">R1</span><span class="rv">라벨 출고용 (A:I 병합)</span></div>
+    <div class="xlsx-row"><span class="rn">R7</span><span class="rv">WIPRO (A:C) &nbsp;<span class="yellow">오늘날짜</span>&nbsp; (D:I)</span></div>
+    <div class="xlsx-row"><span class="rn">R14</span><span class="rv">P/O & DATE / <span class="yellow">영업일+5</span> (G:I)</span></div>
+    <div class="xlsx-row"><span class="rn">R15</span><span class="rv">ETA</span></div>
+    <div class="xlsx-row"><span class="rn">R18</span><span class="rv">헤더 22열 (NO/치수/품명/납기일...)</span></div>
+    <div class="xlsx-row"><span class="rn">R19+</span><span class="rv">좌: 발주서 정보 / 우: ERP 입력용</span></div>
+    <div class="xlsx-row" style="margin-top:4px"><span class="rn" style="color:#475569">col</span><span class="rv" style="color:#475569">0-8: 발주서 영역 / 10-20: ERP 영역</span></div>
+  </div>
+  <div class="xlsx-sheet sheet3">
+    <h3>정의값 — 재질코드 조회표</h3>
+    <div class="xlsx-row"><span class="rn">R1</span><span class="rv">품명표기(자동) / 품명/재질 / 재질 / 출력</span></div>
+    <div class="xlsx-row"><span class="rn">R2</span><span class="rv">W/RS40 → W</span></div>
+    <div class="xlsx-row"><span class="rn">R3</span><span class="rv">W/CN10 → W</span></div>
+    <div class="xlsx-row"><span class="rn">R4</span><span class="rv">W/CN20 → W</span></div>
+    <div class="xlsx-row"><span class="rn">R5</span><span class="rv">W/CM20 → W</span></div>
+    <div class="xlsx-row"><span class="rn">R6-7</span><span class="rv">W/CN10(C=4.5), W/RS40(C=5.5)</span></div>
+    <div class="xlsx-row"><span class="rn">R8-11</span><span class="rv">B/RS40, B/CN10, B/CN20, B/CM20</span></div>
+    <div class="xlsx-row"><span class="rn">R12-14</span><span class="rv">Mostuf P, Mostuf NW, M/W</span></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ 실행 순서 ═══ -->
+<div class="sec-title">실행 순서</div>
+<div class="run-flow">
+  <div class="run-step">
+    <span class="num">1</span>
+    <span class="txt">ERP에서<br>엑셀 4종<br>다운로드</span>
+  </div>
+  <div class="run-arrow">→</div>
+  <div class="run-step">
+    <span class="num">2</span>
+    <span class="txt">start.bat<br>더블클릭</span>
+  </div>
+  <div class="run-arrow">→</div>
+  <div class="run-step">
+    <span class="num">3</span>
+    <span class="txt">refresh.py<br>자동 실행<br>JSON 갱신</span>
+  </div>
+  <div class="run-arrow">→</div>
+  <div class="run-step">
+    <span class="num">4</span>
+    <span class="txt">브라우저<br>localhost<br>:8585</span>
+  </div>
+  <div class="run-arrow">→</div>
+  <div class="run-step">
+    <span class="num">5</span>
+    <span class="txt">필터 조절<br>품목 선택<br>전체선택</span>
+  </div>
+  <div class="run-arrow">→</div>
+  <div class="run-step">
+    <span class="num">6</span>
+    <span class="txt">엑셀<br>다운로드<br>.xlsx</span>
+  </div>
+  <div class="run-arrow">→</div>
+  <div class="run-step" style="border-color:#22c55e">
+    <span class="num" style="color:#22c55e">7</span>
+    <span class="txt">ERP<br>업로드<br>발주 완료</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ ERP 컬럼 메모 ═══ -->
+<div class="sec-title">ERP 입력 파일 컬럼 메모 (0-indexed)</div>
+<div class="col-grid">
+  <div class="col-table">
+    <h3>발주조회.xlsx</h3>
+    <table>
+      <tr><td>4</td><td>거래처명</td></tr>
+      <tr><td>6</td><td>발주일</td></tr>
+      <tr><td>15</td><td>업체치수 (D110D105W15A 형식)</td></tr>
+      <tr><td>17</td><td>재질</td></tr>
+      <tr><td>18</td><td>품목구분 (W/R 필터)</td></tr>
+      <tr><td class="hi">20</td><td class="hi">발주수량 (품목별 개별)</td></tr>
+    </table>
+  </div>
+  <div class="col-table">
+    <h3>라벨조회.xlsx</h3>
+    <table>
+      <tr><td>0</td><td>거래처</td></tr>
+      <tr><td>1</td><td>주문번호</td></tr>
+      <tr><td>2</td><td>주문일</td></tr>
+      <tr><td>4</td><td>치수</td></tr>
+      <tr><td>5</td><td>재질</td></tr>
+      <tr><td>6</td><td>품목</td></tr>
+      <tr><td>8</td><td>수량</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="height:40px"></div>
+</body>
+</html>

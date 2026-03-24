@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+~$*
+*.xlsx
+*.xls
+data500.json
+data_wr.json
+data_wr.js
+graveyard.json
+archive/
+v2/
