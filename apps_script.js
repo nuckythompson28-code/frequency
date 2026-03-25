@@ -4,7 +4,7 @@
 // 웹앱으로 배포 (액세스: 모든 사용자)
 // ======================================
 
-const SS_ID = '1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0';
+const SS_ID = '1zkyYFiX5MGkGj7cnjhpiPvlzHLwN0CZKMFnjl9tTzqA';
 const SHEET_NAME = '무덤';
 const TABLE_SHEET = '생산지시이력';
 

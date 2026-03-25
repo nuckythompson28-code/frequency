@@ -1542,7 +1542,7 @@ function showHistory(key, chisu, jaejil) {
   }
 
   const cbName = '_histCb_' + Date.now();
-  const url = `https://docs.google.com/spreadsheets/d/1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0/gviz/tq?sheet=${HISTORY_TAB}&tqx=responseHandler:${cbName}`;
+  const url = `https://docs.google.com/spreadsheets/d/1zkyYFiX5MGkGj7cnjhpiPvlzHLwN0CZKMFnjl9tTzqA/gviz/tq?sheet=${HISTORY_TAB}&tqx=responseHandler:${cbName}`;
 
   window[cbName] = function(response) {
     try {
@@ -1645,7 +1645,7 @@ function loadHistory() {
 }
 
 // Google Sheets JSONP 로드 (file://에서도 동작 - script 태그 방식)
-const SHEET_ID = '1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0';
+const SHEET_ID = '1zkyYFiX5MGkGj7cnjhpiPvlzHLwN0CZKMFnjl9tTzqA';
 const SHEET_TAB = encodeURIComponent('선생산리스트');
 
 function loadFromSheet(callback) {
