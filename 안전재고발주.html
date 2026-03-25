@@ -22,9 +22,6 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
 .fi input[type=range]{width:90px;accent-color:#3b82f6;cursor:pointer}
 .fi input[type=number]{width:64px;background:#334155;border:1px solid #475569;color:#e2e8f0;border-radius:4px;padding:3px 7px;font-size:12px}
 .fv{font-weight:800;color:#3b82f6;min-width:28px;text-align:right}
-.freq-btn{background:#334155;border:1px solid #475569;color:#94a3b8;font-size:11px;padding:2px 8px;border-radius:4px;cursor:pointer;font-weight:700;min-width:28px}
-.freq-btn:hover{background:#475569;color:#e2e8f0}
-.freq-btn.active{background:#3b82f6;border-color:#3b82f6;color:#fff}
 .filter-div{width:1px;height:20px;background:#334155}
 .btn-sel{background:#0f2a1a;border:1px solid #22c55e;color:#4ade80;font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:600}
 .btn-sel:hover{background:#1a3d28}
@@ -271,19 +268,18 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
 
 <div class="filter-bar">
   <div class="fi"><label>주문횟수 ≥</label>
-    <button class="freq-btn" onclick="setFreq(5)">5</button>
-    <button class="freq-btn" onclick="setFreq(10)">10</button>
-    <button class="freq-btn" onclick="setFreq(15)">15</button>
-    <button class="freq-btn" onclick="setFreq(20)">20</button>
-    <button class="freq-btn" onclick="setFreq(25)">25</button>
-    <button class="freq-btn" onclick="setFreq(30)">30</button>
-    <input type="range" id="fFreq" min="1" max="30" value="8" oninput="applyFilter()">
-    <span class="fv" id="fFreqVal">8</span><span style="color:#64748b;font-size:11px">회</span>
+    <input type="range" id="fFreq" min="1" max="50" value="10" oninput="applyFilter()">
+    <span class="fv" id="fFreqVal">10</span><span style="color:#64748b;font-size:11px">회</span>
   </div>
   <div class="filter-div"></div>
   <div class="fi"><label>재고율 ≤</label>
     <input type="range" id="fStock" min="0" max="100" value="30" oninput="applyFilter()">
     <span class="fv" id="fStockVal">30</span><span style="color:#64748b;font-size:11px">%</span>
+  </div>
+  <div class="filter-div"></div>
+  <div class="fi"><label>점수 ≥</label>
+    <input type="range" id="fScore" min="0" max="100" value="0" oninput="applyFilter()">
+    <span class="fv" id="fScoreVal">0</span>
   </div>
   <div class="filter-div"></div>
   <div class="fi"><label>총량 ≤</label>
@@ -508,29 +504,16 @@ function searchItem() {
   }
 }
 
-let filterFreq = 8, filterStock = 30, filterScore = 0, filterQty = 500;
-
-function setFreq(val) {
-  filterFreq = val;
-  document.getElementById('fFreq').value = val;
-  document.getElementById('fFreqVal').textContent = val;
-  updateFreqBtns();
-  render();
-}
-
-function updateFreqBtns() {
-  document.querySelectorAll('.freq-btn').forEach(btn => {
-    btn.classList.toggle('active', parseInt(btn.textContent) === filterFreq);
-  });
-}
+let filterFreq = 5, filterStock = 30, filterScore = 0, filterQty = 500;
 
 function applyFilter() {
   filterFreq  = parseInt(document.getElementById('fFreq').value)  || 1;
   filterStock = parseInt(document.getElementById('fStock').value) || 0;
+  filterScore = parseInt(document.getElementById('fScore').value) || 0;
   filterQty   = parseInt(document.getElementById('fQty').value)   || 9999;
   document.getElementById('fFreqVal').textContent  = filterFreq;
   document.getElementById('fStockVal').textContent = filterStock;
-  updateFreqBtns();
+  document.getElementById('fScoreVal').textContent = filterScore;
   render();
 }
 
@@ -538,7 +521,7 @@ function getActiveFiltered() {
   const isStocked = r => r.stock >= 0 && r.stock_ratio > filterStock;
   return ITEMS.filter(r =>
     !r.in_production && !isStocked(r) && !isInGrave(r.key) && !(r.key in completed) &&
-    r.freq >= filterFreq && r.total_qty <= filterQty
+    r.freq >= filterFreq && r.total_qty <= filterQty && r.score >= filterScore
   );
 }
 
@@ -559,46 +542,11 @@ function clearExcel() {
 const STORAGE_KEY = 'soltri_graveyard';
 const COMPLETED_KEY = 'soltri_completed';
 const ARCHIVED_KEY = 'soltri_archived';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRiVeUmM1yZZs3GEzB0Y1y-EhVvSNM6Y7jJEXGBtYqhmZlAJcbrNoQBw82M36w6ozebQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhw9T59Mz4fexemVpw1HKQq6GyivaT8OT1DYNntzzsVLIWJfsaE1Y2L_NVt4w5M06tzA/exec';
 let graveyard = {};
 let completed = {};
 let archived = {};  // 재고 충분으로 졸업한 이력 보존
 let undoStack = [];
-
-// ── PC 식별자 (hostname + user-agent 요약) ──
-const PC_ID = (function() {
-  const ua = navigator.userAgent;
-  const os = ua.includes('Windows') ? 'Win' : ua.includes('Mac') ? 'Mac' : 'Other';
-  const browser = ua.includes('Edg/') ? 'Edge' : ua.includes('Chrome') ? 'Chrome' : ua.includes('Firefox') ? 'Firefox' : 'Other';
-  const stored = localStorage.getItem('soltri_pc_name');
-  if (stored) return stored;
-  const name = os + '/' + browser + '/' + Math.random().toString(36).slice(2, 6).toUpperCase();
-  localStorage.setItem('soltri_pc_name', name);
-  return name;
-})();
-
-// ── 변경 로그 전송 ──
-function sendLog(action, key, from, to, note) {
-  if (!APPS_SCRIPT_URL) return;
-  const parts = key.split('|');
-  const log = [{
-    timestamp: new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul', hour12:false}),
-    action: action,
-    chisu: parts[0] || key,
-    jaejil: parts[1] || '',
-    from: from,
-    to: to,
-    pc: PC_ID,
-    note: note || ''
-  }];
-  const data = encodeURIComponent(JSON.stringify(log));
-  const cbName = '_log_' + Date.now();
-  window[cbName] = function() { delete window[cbName]; try { document.body.removeChild(sc); } catch(e){} };
-  const sc = document.createElement('script');
-  sc.src = `${APPS_SCRIPT_URL}?action=log&data=${data}&callback=${cbName}`;
-  sc.onerror = () => { delete window[cbName]; };
-  document.body.appendChild(sc);
-}
 
 function saveLocal() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(graveyard));
@@ -713,7 +661,6 @@ function makeCard(r, type) {
       <span>주문 <strong>${r.freq}회</strong></span>
       <span>총량 <strong>${r.total_qty}개</strong></span>
       <span>평균 <strong>${r.avg_qty}/회</strong></span>
-      ${r.group ? `<span style="background:${r.group===1?'#3b82f633':'#f59e0b33'};color:${r.group===1?'#60a5fa':'#fbbf24'};padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">G${r.group} ${r.suggest_qty}개</span>` : ''}
     </div>
     <div class="stock-bar"><div class="stock-fill ${sc}" style="width:${stockW}%"></div></div>
     <div class="stock-label">
@@ -749,7 +696,6 @@ function runAutoCleanOnce() {
         jaejil: item.jaejil
       };
       delete completed[key];
-      sendLog('자동졸업', key, '생산지시 완료', '재고 충분', '재고율=' + item.stock_ratio + '%');
       autoMoved++;
     }
   }
@@ -793,7 +739,7 @@ function render() {
 
   const activeItems = ITEMS.filter(r =>
     !r.in_production && !isStockedView(r) && !isInGrave(r.key) && !(r.key in completed) &&
-    r.freq >= filterFreq && r.total_qty <= filterQty
+    r.freq >= filterFreq && r.total_qty <= filterQty && r.score >= filterScore
   );
   const graveItems = ITEMS.filter(r => isInGrave(r.key) && !isStockedView(r));
   graveItems.forEach(r => { r._graveDate = graveyard[r.key] || ''; });
@@ -1120,12 +1066,9 @@ function searchAndJump(key) {
 
 function sendToGrave(key) {
   if (isInGrave(key)) return;
-  const item = ITEMS.find(r => r.key === key);
-  const fromState = item && item.in_production ? '이미 생산중' : '선생산 필요';
-  graveyard[key] = new Date().toISOString();
+  graveyard[key] = new Date().toISOString();  // "2026-03-20T09:30:00.000Z" 시간까지 저장
   undoStack.push({ action: 'send', key });
   save();
-  sendLog('생산지시', key, fromState, '생산지시 중');
   showToast('생산지시 중 처리됨');
   render();
 }
@@ -1135,7 +1078,6 @@ function reviveFromGrave(key) {
   delete graveyard[key];
   undoStack.push({ action: 'revive', key, oldDate });
   save();
-  sendLog('복귀', key, '생산지시 중', '선생산 필요');
   showToast('선생산 리스트로 복귀');
   render();
 }
@@ -1149,7 +1091,6 @@ function markCompleted(key) {
   undoStack.push({ action: 'complete', key, graveDate });
   save();
   saveCompleted();
-  sendLog('완료', key, '생산지시 중', '생산지시 완료', '수동완료');
   showToast('생산지시 완료 처리됨');
   render();
 }
@@ -1159,15 +1100,13 @@ function undoLast() {
   const last = undoStack.pop();
   if (last.action === 'send') {
     delete graveyard[last.key];
-    sendLog('되돌리기', last.key, '생산지시 중', '선생산 필요', 'Undo');
   } else if (last.action === 'complete') {
+    // 완료 → 생산지시 중으로 복귀
     graveyard[last.key] = last.graveDate || new Date().toISOString();
     delete completed[last.key];
     saveCompleted();
-    sendLog('되돌리기', last.key, '생산지시 완료', '생산지시 중', 'Undo');
   } else {
     graveyard[last.key] = last.oldDate || '';
-    sendLog('되돌리기', last.key, '선생산 필요', '생산지시 중', 'Undo');
   }
   save();
   showToast('되돌리기 완료');
@@ -1182,7 +1121,6 @@ function autoRemoveGraveyard() {
     if (item && item.latest_balju && graveDate && item.latest_balju >= graveDate) {
       completed[key] = { graveDate, completedDate: item.latest_balju };
       delete graveyard[key];
-      sendLog('자동완료', key, '생산지시 중', '생산지시 완료', '발주일=' + item.latest_balju);
       removed++;
     }
   }
@@ -1417,7 +1355,7 @@ function downloadExcel() {
     }
     function mg(r1,c1,r2,c2){ merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
 
-    // Row 1: ��벨 출고용 A1:I1
+    // Row 1: 라벨 출고용 A1:I1
     p(0,0,'라벨 출고용', {bold:true, align:'center'}); mg(0,0,0,8);
 
     // Row 2: SHIPPER A2:B2 / NO & DATE D2:F2
@@ -1438,10 +1376,10 @@ function downloadExcel() {
 
     // Row 5
     p(4,0,'INCHEON KOREA TEL : 82-32-761-2323');
-    p(4,10,'제품정보는 " * "로 되어있어야 하고, 인보이�� 엑셀은 "X" 또는 "x"로 되어있어야 됨');
+    p(4,10,'제품정보는 " * "로 되어있어야 하고, 인보이스 엑셀은 "X" 또는 "x"로 되어있어야 됨');
     p(4,17,'M'); p(4,18,'MOSTUF');
 
-    // Row 6: 업체명 A6:B6 / 발주번호 D6:F6 + 주의사���/품목표시
+    // Row 6: 업체명 A6:B6 / 발주번호 D6:F6 + 주의사항/품목표시
     p(5,0,'업체명', {bold:true, align:'center'}); mg(5,0,5,1);
     p(5,3,'발주일', {bold:true, align:'center'}); mg(5,3,5,5);
     p(5,10,'가지수가 많을경우 삽입해서 해도 됨');
@@ -1768,7 +1706,6 @@ loadGraveyardFromSheet(function() {
     autoCleanCompleted();
     syncToServer();  // graveyard 상태를 서버에 저장 (refresh.py 연동)
     populateJaejilSelect();
-    updateFreqBtns();
     render();
     loadHistory();
   });

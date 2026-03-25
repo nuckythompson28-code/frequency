@@ -210,24 +210,10 @@ with open(f'{OUT}/data500.json', 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, separators=(',', ':'))
 
 # W/R 핵심 → data_wr.json
-# 그룹1: 8회 이상, 총량 500 이하 (부족 수량 생산)
-# 그룹2: 13회 이상, 총량 1000 이하 (최대 500개 생산)
-items = [r for r in results if r['pumok'] == 'W/R' and (
-    (r['freq'] >= 8 and r['total_qty'] <= 500) or
-    (r['freq'] >= 13 and r['total_qty'] <= 1000)
-)]
+items = [r for r in results if r['pumok'] == 'W/R' and r['freq'] >= 5]
 items.sort(key=lambda x: x['score'], reverse=True)
 for r in items:
     r['key'] = f"{r['chisu']}|{r['jaejil']}"
-    stk = r['stock'] if r['stock'] >= 0 else 0
-    if r['total_qty'] <= 500:
-        # 그룹1: 부족 수량 생산
-        r['group'] = 1
-        r['suggest_qty'] = max(0, r['total_qty'] - stk)
-    else:
-        # 그룹2: 최대 500개
-        r['group'] = 2
-        r['suggest_qty'] = min(500, max(0, r['total_qty'] - stk))
 
 with open(f'{OUT}/data_wr.json', 'w', encoding='utf-8') as f:
     json.dump(items, f, ensure_ascii=False, separators=(',', ':'))

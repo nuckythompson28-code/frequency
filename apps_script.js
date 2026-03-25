@@ -7,7 +7,6 @@
 const SS_ID = '1zkyYFiX5MGkGj7cnjhpiPvlzHLwN0CZKMFnjl9tTzqA';
 const SHEET_NAME = '무덤';
 const TABLE_SHEET = '생산지시이력';
-const LOG_SHEET = '변경로그';
 
 function getSheet() {
   const ss = SpreadsheetApp.openById(SS_ID);
@@ -84,77 +83,10 @@ function syncTable(graveJson, compJson) {
   }
 }
 
-function getLogSheet() {
-  const ss = SpreadsheetApp.openById(SS_ID);
-  let sheet = ss.getSheetByName(LOG_SHEET);
-  if (!sheet) {
-    sheet = ss.insertSheet(LOG_SHEET);
-    sheet.getRange('A1:H1').setValues([['시각', '액션', '치수', '재질', 'From', 'To', 'PC', '비고']]);
-    sheet.getRange('A1:H1').setFontWeight('bold').setBackground('#1e3a5f').setFontColor('#e2e8f0');
-    sheet.setFrozenRows(1);
-    sheet.setColumnWidth(1, 160);
-    sheet.setColumnWidth(2, 100);
-    sheet.setColumnWidth(3, 140);
-    sheet.setColumnWidth(4, 80);
-    sheet.setColumnWidth(5, 100);
-    sheet.setColumnWidth(6, 100);
-    sheet.setColumnWidth(7, 140);
-    sheet.setColumnWidth(8, 120);
-  }
-  return sheet;
-}
-
-function appendLog(logJson) {
-  const sheet = getLogSheet();
-  const logs = JSON.parse(logJson || '[]');
-  if (!Array.isArray(logs) || logs.length === 0) return;
-
-  const rows = logs.map(function(log) {
-    return [
-      log.timestamp || new Date().toISOString(),
-      log.action || '',
-      log.chisu || '',
-      log.jaejil || '',
-      log.from || '',
-      log.to || '',
-      log.pc || '',
-      log.note || ''
-    ];
-  });
-
-  const lastRow = sheet.getLastRow();
-  sheet.getRange(lastRow + 1, 1, rows.length, 8).setValues(rows);
-
-  // 액션별 색상
-  for (let i = 0; i < rows.length; i++) {
-    const range = sheet.getRange(lastRow + 1 + i, 1, 1, 8);
-    const action = rows[i][1];
-    if (action === '생산지시') {
-      range.setBackground('#fff8e1');
-    } else if (action === '완료') {
-      range.setBackground('#e8f5e9');
-    } else if (action === '복귀') {
-      range.setBackground('#fce4ec');
-    } else if (action === '자동완료') {
-      range.setBackground('#e3f2fd');
-    } else if (action === '자동졸업') {
-      range.setBackground('#f3e5f5');
-    }
-  }
-}
-
 function doGet(e) {
   const action = e.parameter.action || 'load';
   const callback = e.parameter.callback || 'cb';
   const sheet = getSheet();
-
-  if (action === 'log') {
-    const logData = decodeURIComponent(e.parameter.data || '[]');
-    try { appendLog(logData); } catch(err) {}
-    return ContentService
-      .createTextOutput(callback + '({"ok":true})')
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
 
   if (action === 'save') {
     const type = e.parameter.type || 'graveyard';
