@@ -713,6 +713,7 @@ function makeCard(r, type) {
       <span>주문 <strong>${r.freq}회</strong></span>
       <span>총량 <strong>${r.total_qty}개</strong></span>
       <span>평균 <strong>${r.avg_qty}/회</strong></span>
+      ${r.group ? `<span style="background:${r.group===1?'#3b82f633':'#f59e0b33'};color:${r.group===1?'#60a5fa':'#fbbf24'};padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">G${r.group} ${r.suggest_qty}개</span>` : ''}
     </div>
     <div class="stock-bar"><div class="stock-fill ${sc}" style="width:${stockW}%"></div></div>
     <div class="stock-label">
