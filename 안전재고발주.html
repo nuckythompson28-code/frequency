@@ -741,9 +741,9 @@ function render() {
     !r.in_production && !isStockedView(r) && !isInGrave(r.key) && !(r.key in completed) &&
     r.freq >= filterFreq && r.total_qty <= filterQty && r.score >= filterScore
   );
-  const graveItems = ITEMS.filter(r => isInGrave(r.key) && !isStockedView(r));
+  const graveItems = ITEMS.filter(r => isInGrave(r.key));
   graveItems.forEach(r => { r._graveDate = graveyard[r.key] || ''; });
-  const completedItems = ITEMS.filter(r => r.key in completed && !isStockedView(r));
+  const completedItems = ITEMS.filter(r => r.key in completed);
   completedItems.forEach(r => { r._completedDate = completed[r.key].completedDate || ''; r._graveDate = completed[r.key].graveDate || ''; });
   const stockedItems = ITEMS.filter(r => isStockedView(r) && !isInGrave(r.key) && !(r.key in completed));
   // 생산중 = 7일내 가공이력 있고 재고 아직 부족 (graveyard, completed 제외)
