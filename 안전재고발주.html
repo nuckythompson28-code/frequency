@@ -122,6 +122,86 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
 
 .empty-msg{text-align:center;padding:40px;color:#475569;font-size:14px}
 
+.search-bar{background:#0f1d32;border-bottom:1px solid #334155;padding:8px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search-bar input[type=text]{background:#334155;border:1px solid #475569;color:#e2e8f0;border-radius:6px;padding:6px 12px;font-size:13px;width:160px}
+.search-bar input[type=text]::placeholder{color:#64748b}
+.search-bar select{background:#334155;border:1px solid #475569;color:#e2e8f0;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer}
+.search-bar .btn-search{background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.search-bar .btn-search:hover{background:#2563eb}
+.search-bar .search-results{font-size:11px;color:#64748b}
+.card.highlight{border-color:#f59e0b!important;box-shadow:0 0 20px rgba(245,158,11,.4)!important;animation:highlightPulse 1.5s ease-out}
+@keyframes highlightPulse{0%{box-shadow:0 0 30px rgba(245,158,11,.6)}100%{box-shadow:0 0 20px rgba(245,158,11,.4)}}
+
+.sort-btn{background:#334155;border:1px solid #475569;color:#94a3b8;font-size:11px;padding:3px 10px;border-radius:4px;cursor:pointer;margin-left:8px;font-weight:600}
+.sort-btn:hover{background:#475569;color:#e2e8f0}
+.sort-btn.active{background:#3b82f6;border-color:#3b82f6;color:#fff}
+
+/* ── Dashboard ── */
+.dash-toggle{background:#6366f1;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.dash-toggle:hover{background:#4f46e5}
+.dashboard{padding:0 24px 12px;display:none}
+.dashboard.show{display:block}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dash-panel{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 18px;overflow:hidden}
+.dash-panel h3{font-size:13px;color:#94a3b8;margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.dash-panel.full{grid-column:1/-1}
+
+/* Pipeline */
+.pipeline{display:flex;align-items:center;gap:0;margin:8px 0}
+.pipe-stage{flex:1;text-align:center;position:relative;padding:14px 8px;border-radius:8px}
+.pipe-stage .pipe-num{font-size:32px;font-weight:800;line-height:1}
+.pipe-stage .pipe-lbl{font-size:11px;margin-top:4px;opacity:.8}
+.pipe-stage .pipe-sub{font-size:10px;margin-top:2px;opacity:.5}
+.pipe-arrow{font-size:20px;color:#475569;flex-shrink:0;padding:0 2px}
+
+/* Bars */
+.hbar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.hbar-label{width:52px;text-align:right;color:#94a3b8;flex-shrink:0;font-weight:600}
+.hbar-track{flex:1;height:22px;background:#334155;border-radius:4px;overflow:hidden;position:relative}
+.hbar-fill{height:100%;border-radius:4px;transition:width .4s;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;min-width:fit-content}
+.hbar-val{margin-left:8px;color:#94a3b8;font-size:11px;flex-shrink:0;width:32px}
+
+/* Stacked bar */
+.stacked-bar{display:flex;height:28px;border-radius:6px;overflow:hidden;margin-bottom:4px}
+.stacked-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;transition:width .4s}
+.stacked-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.stacked-legend span{display:flex;align-items:center;gap:5px;font-size:11px;color:#94a3b8}
+.stacked-legend .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* Urgent table */
+.urgent-table{width:100%;font-size:12px;border-collapse:collapse}
+.urgent-table th{text-align:left;color:#64748b;padding:4px 8px;font-size:10px;text-transform:uppercase;border-bottom:1px solid #334155}
+.urgent-table td{padding:6px 8px;border-bottom:1px solid #1e293b22}
+.urgent-table tr:hover{background:#334155}
+.urgent-table .u-chisu{font-weight:700;color:#f8fafc}
+.urgent-table .u-score{font-weight:800;color:#ef4444}
+.urgent-table .u-stock{font-weight:700}
+.urgent-table .u-badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;color:#fff}
+.urgent-table .clickable{cursor:pointer}
+.urgent-table .clickable:hover{color:#3b82f6}
+
+/* Progress ring */
+.progress-ring-wrap{display:flex;align-items:center;gap:20px}
+.progress-ring{position:relative;width:100px;height:100px;flex-shrink:0}
+.progress-ring svg{transform:rotate(-90deg)}
+.progress-ring .ring-bg{fill:none;stroke:#334155;stroke-width:8}
+.progress-ring .ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s}
+.progress-ring .ring-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:800}
+.progress-detail{font-size:12px;color:#94a3b8;line-height:2}
+.progress-detail strong{color:#e2e8f0}
+
+/* Jaejil colors */
+.jc-CN10{background:#b8860b}
+.jc-RS40{background:#0d9488}
+.jc-CM20{background:#6b7280}
+.jc-CN20{background:#7c3aed}
+.jc-other{background:#475569}
+
+@media(max-width:768px){
+  .dash-grid{grid-template-columns:1fr}
+  .dash-panel.full{grid-column:1}
+}
+
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid #334155;padding:10px 24px;border-radius:8px;font-size:13px;color:#e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:200;opacity:0;transition:opacity .3s}
 .toast.show{opacity:1}
 
@@ -165,6 +245,7 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
     <div class="sub">100일간 10회 이상 반복 주문 · 총량 500개 이하 · 재고 30% 미만 · 7일내 미생산 품목</div>
   </div>
   <div class="actions no-print">
+    <button class="dash-toggle" onclick="toggleDashboard()">대시보드</button>
     <button class="btn btn-refresh" onclick="refreshCheck()">리프레시</button>
     <button class="btn" style="background:#22c55e;color:#fff;display:none" onclick="downloadExcel()" id="btnExcel">엑셀 다운로드 (<span id="excelCount">0</span>)</button>
     <button class="btn btn-undo" onclick="undoLast()" id="btnUndo" style="display:none">되돌리기</button>
@@ -197,14 +278,41 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <button class="btn-sel" onclick="selectAllActive()">전체 선택 →엑셀</button>
   <button class="btn-clr" onclick="clearExcel()">선택 해제</button>
   <span id="filterCount" style="font-size:11px;color:#64748b;margin-left:4px"></span>
+  <span style="font-size:10px;color:#475569;margin-left:8px">* 필터는 화면 표시만 변경 (데이터 영향 없음)</span>
+</div>
+
+<div class="search-bar no-print">
+  <label style="color:#94a3b8;font-size:12px;white-space:nowrap">품목 검색</label>
+  <input type="text" id="searchChisu" placeholder="치수 (예: 110*105*15)" onkeydown="if(event.key==='Enter')searchItem()">
+  <select id="searchJaejil">
+    <option value="">전체 재질</option>
+  </select>
+  <button class="btn-search" onclick="searchItem()">검색</button>
+  <span class="search-results" id="searchResult"></span>
 </div>
 
 <div class="stats" id="stats"></div>
+
+<div class="dashboard no-print" id="dashboard">
+  <div class="dash-grid">
+    <!-- 파이프라인 -->
+    <div class="dash-panel full" id="dashPipeline"></div>
+    <!-- 재질별 분포 -->
+    <div class="dash-panel" id="dashJaejil"></div>
+    <!-- 재고 위험도 -->
+    <div class="dash-panel" id="dashRisk"></div>
+    <!-- 생산 진행률 -->
+    <div class="dash-panel" id="dashProgress"></div>
+    <!-- 긴급 TOP 5 -->
+    <div class="dash-panel" id="dashUrgent"></div>
+  </div>
+</div>
 
 <div class="section active" id="secActive">
   <div class="section-header" onclick="toggleSection('active')">
     <h2>선생산 필요</h2>
     <span class="badge" id="badgeActive">0</span>
+    <button class="sort-btn no-print" onclick="event.stopPropagation();toggleSort('active')">치수순 <span id="sortIconActive">↕</span></button>
     <span class="toggle" id="toggleActive">▼</span>
   </div>
   <div class="grid" id="gridActive"></div>
@@ -214,6 +322,7 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <div class="section-header" onclick="toggleSection('grave')">
     <h2>생산지시 중</h2>
     <span class="badge" id="badgeGrave">0</span>
+    <button class="sort-btn no-print" onclick="event.stopPropagation();toggleSort('grave')">치수순 <span id="sortIconGrave">↕</span></button>
     <span class="toggle" id="toggleGrave">▼</span>
   </div>
   <div class="grid" id="gridGrave"></div>
@@ -223,6 +332,7 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <div class="section-header" onclick="toggleSection('completed')">
     <h2>생산지시 완료</h2>
     <span class="badge" id="badgeCompleted">0</span>
+    <button class="sort-btn no-print" onclick="event.stopPropagation();toggleSort('completed')">치수순 <span id="sortIconCompleted">↕</span></button>
     <span class="toggle" id="toggleCompleted">▼</span>
   </div>
   <div class="grid" id="gridCompleted"></div>
@@ -232,6 +342,7 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <div class="section-header" onclick="toggleSection('stocked')">
     <h2>재고 충분 (생산 완료)</h2>
     <span class="badge" id="badgeStocked">0</span>
+    <button class="sort-btn no-print" onclick="event.stopPropagation();toggleSort('stocked')">치수순 <span id="sortIconStocked">↕</span></button>
     <span class="toggle" id="toggleStocked">▶</span>
   </div>
   <div class="grid" id="gridStocked" style="display:none"></div>
@@ -241,6 +352,7 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <div class="section-header" onclick="toggleSection('prod')">
     <h2>이미 생산중 (7일 내 가공이력)</h2>
     <span class="badge" id="badgeProd">0</span>
+    <button class="sort-btn no-print" onclick="event.stopPropagation();toggleSort('prod')">치수순 <span id="sortIconProd">↕</span></button>
     <span class="toggle" id="toggleProd">▶</span>
   </div>
   <div class="grid" id="gridProd" style="display:none"></div>
@@ -272,6 +384,111 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
 <script>
 let ITEMS = [];
 let excelList = new Set();  // 엑셀 내보낼 품목 키
+
+// 정렬 상태: 'none' | 'asc' | 'desc'
+let sortState = { active:'none', grave:'none', completed:'none', stocked:'none', prod:'none' };
+
+// 치수 파싱 → 숫자 배열 (110*105*15 → [110,105,15])
+function parseChisuNums(chisu) {
+  return String(chisu).split('*').map(s => parseFloat(s) || 0);
+}
+
+// 치수 비교 (내경 우선 → 외경 → 높이)
+function compareChisu(a, b) {
+  const pa = parseChisuNums(a.chisu), pb = parseChisuNums(b.chisu);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i]||0) - (pb[i]||0);
+    if (diff !== 0) return diff;
+  }
+  return a.jaejil.localeCompare(b.jaejil);
+}
+
+function sortItems(items, section) {
+  const st = sortState[section];
+  if (st === 'none') return items;
+  const sorted = [...items].sort(compareChisu);
+  return st === 'desc' ? sorted.reverse() : sorted;
+}
+
+function toggleSort(section) {
+  const cycle = { none:'asc', asc:'desc', desc:'none' };
+  sortState[section] = cycle[sortState[section]];
+  const icons = { none:'↕', asc:'↑', desc:'↓' };
+  const nameMap = { active:'Active', grave:'Grave', completed:'Completed', stocked:'Stocked', prod:'Prod' };
+  const iconEl = document.getElementById('sortIcon' + nameMap[section]);
+  const btnEl = iconEl.parentElement;
+  iconEl.textContent = icons[sortState[section]];
+  btnEl.classList.toggle('active', sortState[section] !== 'none');
+  render();
+}
+
+// 검색 기능
+function populateJaejilSelect() {
+  const jaejils = [...new Set(ITEMS.map(r => r.jaejil))].sort();
+  const sel = document.getElementById('searchJaejil');
+  sel.innerHTML = '<option value="">전체 재질</option>';
+  jaejils.forEach(j => {
+    sel.innerHTML += `<option value="${j}">${j}</option>`;
+  });
+}
+
+function searchItem() {
+  const query = document.getElementById('searchChisu').value.trim();
+  const jaejil = document.getElementById('searchJaejil').value;
+  const resultEl = document.getElementById('searchResult');
+
+  if (!query && !jaejil) { resultEl.textContent = '치수 또는 재질을 입력하세요'; return; }
+
+  // 이전 하이라이트 제거
+  document.querySelectorAll('.card.highlight').forEach(el => el.classList.remove('highlight'));
+
+  // 검색: 치수 부분 일치 + 재질 필터
+  const matches = ITEMS.filter(r => {
+    const chisuMatch = !query || r.chisu.includes(query);
+    const jaejilMatch = !jaejil || r.jaejil === jaejil;
+    return chisuMatch && jaejilMatch;
+  });
+
+  if (matches.length === 0) {
+    resultEl.textContent = '일치하는 품목이 없습니다';
+    return;
+  }
+
+  resultEl.textContent = `${matches.length}개 품목 발견`;
+
+  // 첫 번째 매치 카드로 스크롤
+  const firstMatch = matches[0];
+  const cardId = 'card-' + firstMatch.key.replace(/[*|.]/g, '_');
+  const cardEl = document.getElementById(cardId);
+
+  if (cardEl) {
+    // 해당 섹션이 접혀있으면 펼치기
+    const section = cardEl.closest('.section');
+    if (section) {
+      const grid = section.querySelector('.grid');
+      if (grid && grid.style.display === 'none') {
+        const secName = section.id.replace('sec','').toLowerCase()
+          .replace('active','active').replace('grave','grave')
+          .replace('completed','completed').replace('stocked','stocked').replace('prod','prod');
+        toggleSection(secName);
+      }
+    }
+    cardEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    cardEl.classList.add('highlight');
+    // 모든 매치 하이라이트
+    matches.forEach(m => {
+      const id = 'card-' + m.key.replace(/[*|.]/g, '_');
+      const el = document.getElementById(id);
+      if (el) el.classList.add('highlight');
+    });
+    // 5초 후 하이라이트 제거
+    setTimeout(() => {
+      document.querySelectorAll('.card.highlight').forEach(el => el.classList.remove('highlight'));
+    }, 5000);
+  } else {
+    resultEl.textContent = `${matches.length}개 품목 발견 (필터에 의해 숨겨진 카드 포함)`;
+  }
+}
 
 let filterFreq = 5, filterStock = 30, filterScore = 0, filterQty = 500;
 
@@ -391,6 +608,7 @@ function refreshCheck() {
   loadFromSheet(function(newData) {
     if (!newData) { showToast('데이터 로드 실패'); return; }
     ITEMS = newData;
+    _autoCleanDone = false;  // 새 데이터로 자동이동 재판정 허용
     showToast('데이터 갱신 완료');
     render();
   });
@@ -441,26 +659,21 @@ function makeCard(r, type) {
   </div>`;
 }
 
-function render() {
+// 초기 로드시 한 번만 실행하는 자동 이동 로직 (고정 기준 30%)
+const STOCK_THRESHOLD = 30;  // 자동 이동 판정 기준 (고정)
+let _autoCleanDone = false;
 
-  // 재고율 기준은 필터값 사용
-  const isStocked = r => r.stock >= 0 && r.stock_ratio > filterStock;
-  const itemKeys = new Set(ITEMS.map(r => r.key));
+function runAutoCleanOnce() {
+  if (_autoCleanDone) return;
+  _autoCleanDone = true;
 
-  // ── 시나리오 3: graveyard에 있는 품목은 in_production 무시 ──
-  // (이미 우리가 추적 중이므로 "이미 생산중"에 중복 표시 방지)
-  ITEMS.forEach(r => {
-    if (isInGrave(r.key) || r.key in completed) {
-      r._origInProd = r.in_production;
-      r.in_production = false;
-    }
-  });
+  const isStockedFixed = r => r.stock >= 0 && r.stock_ratio > STOCK_THRESHOLD;
 
-  // ── 시나리오 2: completed → 재고 충분 이동 시 이력 보존 (archived) ──
+  // completed → archived (재고 충분으로 졸업)
   let autoMoved = 0;
   for (const key of Object.keys(completed)) {
     const item = ITEMS.find(r => r.key === key);
-    if (item && isStocked(item)) {
+    if (item && isStockedFixed(item)) {
       archived[key] = {
         graveDate: completed[key].graveDate,
         completedDate: completed[key].completedDate,
@@ -476,6 +689,24 @@ function render() {
     saveCompleted();
     showToast(`재고 충족 ${autoMoved}개 → 재고 충분으로 자동 이동 (이력 보존됨)`);
   }
+}
+
+function render() {
+
+  // 화면 표시용 필터 (데이터 영구 변경 없음)
+  const isStockedView = r => r.stock >= 0 && r.stock_ratio > filterStock;
+  const itemKeys = new Set(ITEMS.map(r => r.key));
+
+  // ── 시나리오 3: graveyard에 있는 품목은 in_production 무시 ──
+  ITEMS.forEach(r => {
+    if (isInGrave(r.key) || r.key in completed) {
+      r._origInProd = r.in_production;
+      r.in_production = false;
+    }
+  });
+
+  // ── 초기 로드시 한 번만 자동 이동 (고정 30% 기준) ──
+  runAutoCleanOnce();
 
   // ── 시나리오 1: orphan 감지 (graveyard/completed에 있는데 ITEMS에 없는 품목) ──
   const orphanGrave = [];
@@ -493,31 +724,37 @@ function render() {
   const orphans = [...orphanGrave, ...orphanCompleted];
 
   const activeItems = ITEMS.filter(r =>
-    !r.in_production && !isStocked(r) && !isInGrave(r.key) && !(r.key in completed) &&
+    !r.in_production && !isStockedView(r) && !isInGrave(r.key) && !(r.key in completed) &&
     r.freq >= filterFreq && r.total_qty <= filterQty && r.score >= filterScore
   );
-  const graveItems = ITEMS.filter(r => isInGrave(r.key) && !isStocked(r));
+  const graveItems = ITEMS.filter(r => isInGrave(r.key) && !isStockedView(r));
   graveItems.forEach(r => { r._graveDate = graveyard[r.key] || ''; });
-  const completedItems = ITEMS.filter(r => r.key in completed && !isStocked(r));
+  const completedItems = ITEMS.filter(r => r.key in completed && !isStockedView(r));
   completedItems.forEach(r => { r._completedDate = completed[r.key].completedDate || ''; r._graveDate = completed[r.key].graveDate || ''; });
-  const stockedItems = ITEMS.filter(r => isStocked(r) && !isInGrave(r.key) && !(r.key in completed));
+  const stockedItems = ITEMS.filter(r => isStockedView(r) && !isInGrave(r.key) && !(r.key in completed));
   // 생산중 = 7일내 가공이력 있고 재고 아직 부족 (graveyard, completed 제외)
-  const prodItems = ITEMS.filter(r => r.in_production && !isStocked(r) && !isInGrave(r.key) && !(r.key in completed));
+  const prodItems = ITEMS.filter(r => r.in_production && !isStockedView(r) && !isInGrave(r.key) && !(r.key in completed));
 
-  document.getElementById('gridActive').innerHTML = activeItems.length
-    ? activeItems.map(r => makeCard(r, 'active')).join('')
+  const sortedActive = sortItems(activeItems, 'active');
+  const sortedGrave = sortItems(graveItems, 'grave');
+  const sortedCompleted = sortItems(completedItems, 'completed');
+  const sortedStocked = sortItems(stockedItems, 'stocked');
+  const sortedProd = sortItems(prodItems, 'prod');
+
+  document.getElementById('gridActive').innerHTML = sortedActive.length
+    ? sortedActive.map(r => makeCard(r, 'active')).join('')
     : '<div class="empty-msg">모든 품목 생산지시 중!</div>';
-  document.getElementById('gridGrave').innerHTML = graveItems.length
-    ? graveItems.map(r => makeCard(r, 'grave')).join('')
+  document.getElementById('gridGrave').innerHTML = sortedGrave.length
+    ? sortedGrave.map(r => makeCard(r, 'grave')).join('')
     : '<div class="empty-msg">아직 없음</div>';
-  document.getElementById('gridCompleted').innerHTML = completedItems.length
-    ? completedItems.map(r => makeCard(r, 'completed')).join('')
+  document.getElementById('gridCompleted').innerHTML = sortedCompleted.length
+    ? sortedCompleted.map(r => makeCard(r, 'completed')).join('')
     : '<div class="empty-msg">아직 없음</div>';
   document.getElementById('badgeCompleted').textContent = completedItems.length;
-  document.getElementById('gridStocked').innerHTML = stockedItems.length
-    ? stockedItems.map(r => makeCard(r, 'stocked')).join('')
+  document.getElementById('gridStocked').innerHTML = sortedStocked.length
+    ? sortedStocked.map(r => makeCard(r, 'stocked')).join('')
     : '<div class="empty-msg">아직 없음</div>';
-  document.getElementById('gridProd').innerHTML = prodItems.map(r => makeCard(r, 'prod')).join('');
+  document.getElementById('gridProd').innerHTML = sortedProd.map(r => makeCard(r, 'prod')).join('');
 
   // ── orphan 섹션 렌더링 ──
   const orphanEl = document.getElementById('secOrphan');
@@ -561,11 +798,191 @@ function render() {
     <div class="stat info"><div class="num">${stockedItems.length}</div><div class="lbl">재고 충분</div></div>
   `;
 
+  renderDashboard(activeItems, graveItems, completedItems, stockedItems, prodItems);
+
   document.getElementById('btnUndo').style.display = undoStack.length ? '' : 'none';
   const fc = document.getElementById('filterCount');
   if (fc) fc.textContent = `필터 결과 ${activeItems.length}개`;
 
   if (typeof renderTimelines === 'function') renderTimelines();
+}
+
+function toggleDashboard() {
+  const el = document.getElementById('dashboard');
+  el.classList.toggle('show');
+}
+
+function renderDashboard(activeItems, graveItems, completedItems, stockedItems, prodItems) {
+  const total = ITEMS.length;
+  if (!total) return;
+
+  // ── 1. 파이프라인 ──
+  const stages = [
+    { label:'선생산 필요', count:activeItems.length, color:'#ef4444', bg:'#ef444422' },
+    { label:'생산지시 중', count:graveItems.length, color:'#94a3b8', bg:'#47556922' },
+    { label:'생산지시 완료', count:completedItems.length, color:'#a78bfa', bg:'#7c3aed22' },
+    { label:'이미 생산중', count:prodItems.length, color:'#3b82f6', bg:'#3b82f622' },
+    { label:'재고 충분', count:stockedItems.length, color:'#22c55e', bg:'#22c55e22' }
+  ];
+  const managed = graveItems.length + completedItems.length + stockedItems.length;
+  document.getElementById('dashPipeline').innerHTML = `
+    <h3>생산 파이프라인</h3>
+    <div class="pipeline">
+      ${stages.map((s,i) => `
+        <div class="pipe-stage" style="background:${s.bg};border:1px solid ${s.color}33">
+          <div class="pipe-num" style="color:${s.color}">${s.count}</div>
+          <div class="pipe-lbl" style="color:${s.color}">${s.label}</div>
+        </div>
+        ${i < stages.length-1 ? '<div class="pipe-arrow">→</div>' : ''}
+      `).join('')}
+    </div>
+    <div style="text-align:center;margin-top:8px;font-size:12px;color:#64748b">
+      전체 <strong style="color:#e2e8f0">${total}</strong>개 품목 중
+      <strong style="color:#22c55e">${managed}</strong>개 관리 완료
+      (<strong style="color:#3b82f6">${total > 0 ? Math.round(managed/total*100) : 0}%</strong>)
+    </div>`;
+
+  // ── 2. 재질별 분포 ──
+  const jaejilMap = {};
+  const jaejilColors = { CN10:'#b8860b', RS40:'#0d9488', CM20:'#6b7280', CN20:'#7c3aed' };
+  ITEMS.forEach(r => { jaejilMap[r.jaejil] = (jaejilMap[r.jaejil]||0) + 1; });
+  const jaejilSorted = Object.entries(jaejilMap).sort((a,b) => b[1]-a[1]);
+  const maxJCount = jaejilSorted.length > 0 ? jaejilSorted[0][1] : 1;
+
+  // 재질별 상세 (active vs managed)
+  const jaejilActive = {}, jaejilManaged = {};
+  activeItems.forEach(r => { jaejilActive[r.jaejil] = (jaejilActive[r.jaejil]||0) + 1; });
+  [...graveItems,...completedItems,...stockedItems].forEach(r => { jaejilManaged[r.jaejil] = (jaejilManaged[r.jaejil]||0) + 1; });
+
+  document.getElementById('dashJaejil').innerHTML = `
+    <h3>재질별 분포</h3>
+    ${jaejilSorted.map(([j, cnt]) => {
+      const pct = Math.round(cnt/maxJCount*100);
+      const c = jaejilColors[j] || '#475569';
+      const act = jaejilActive[j]||0;
+      const mgd = jaejilManaged[j]||0;
+      return `<div class="hbar-row">
+        <span class="hbar-label">${j}</span>
+        <div class="hbar-track">
+          <div class="hbar-fill" style="width:${pct}%;background:${c}">${cnt}개</div>
+        </div>
+        <span class="hbar-val" style="color:${act>0?'#ef4444':'#22c55e'}" title="필요 ${act} / 관리 ${mgd}">${act>0?act+'!':'OK'}</span>
+      </div>`;
+    }).join('')}`;
+
+  // ── 3. 재고 위험도 분포 ──
+  const risk0 = ITEMS.filter(r => r.stock >= 0 && r.stock === 0).length;
+  const risk10 = ITEMS.filter(r => r.stock >= 0 && r.stock > 0 && r.stock_ratio <= 10).length;
+  const risk20 = ITEMS.filter(r => r.stock >= 0 && r.stock_ratio > 10 && r.stock_ratio <= 20).length;
+  const risk30 = ITEMS.filter(r => r.stock >= 0 && r.stock_ratio > 20 && r.stock_ratio <= 30).length;
+  const riskOk = ITEMS.filter(r => r.stock >= 0 && r.stock_ratio > 30).length;
+  const riskNa = ITEMS.filter(r => r.stock < 0).length;
+  const riskSegs = [
+    { label:'재고 0', count:risk0, color:'#dc2626' },
+    { label:'~10%', count:risk10, color:'#ef4444' },
+    { label:'~20%', count:risk20, color:'#f59e0b' },
+    { label:'~30%', count:risk30, color:'#eab308' },
+    { label:'30%+', count:riskOk, color:'#22c55e' },
+    { label:'미등록', count:riskNa, color:'#475569' }
+  ].filter(s => s.count > 0);
+
+  document.getElementById('dashRisk').innerHTML = `
+    <h3>재고 위험도 분포</h3>
+    <div class="stacked-bar">
+      ${riskSegs.map(s => {
+        const w = Math.max(s.count/total*100, 2);
+        return `<div class="stacked-seg" style="width:${w}%;background:${s.color}" title="${s.label}: ${s.count}개">${s.count > 0 ? s.count : ''}</div>`;
+      }).join('')}
+    </div>
+    <div class="stacked-legend">
+      ${riskSegs.map(s => `<span><span class="dot" style="background:${s.color}"></span>${s.label} ${s.count}</span>`).join('')}
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#64748b">
+      위험(0~10%): <strong style="color:#ef4444">${risk0+risk10}개</strong>
+      &nbsp;·&nbsp; 주의(~20%): <strong style="color:#f59e0b">${risk20}개</strong>
+      &nbsp;·&nbsp; 안전(30%+): <strong style="color:#22c55e">${riskOk}개</strong>
+    </div>`;
+
+  // ── 4. 생산 진행률 ──
+  const totalManageable = activeItems.length + graveItems.length + completedItems.length + stockedItems.length;
+  const doneCount = stockedItems.length + completedItems.length;
+  const progressPct = totalManageable > 0 ? Math.round(doneCount / totalManageable * 100) : 0;
+  const circumference = 2 * Math.PI * 42;
+  const offset = circumference - (progressPct / 100) * circumference;
+  const progressColor = progressPct >= 70 ? '#22c55e' : progressPct >= 40 ? '#f59e0b' : '#ef4444';
+
+  // 평균 처리일 계산
+  let avgDays = 0, dayCount = 0;
+  for (const [key, info] of Object.entries(completed)) {
+    if (info.graveDate && info.completedDate) {
+      const d1 = new Date(info.graveDate), d2 = new Date(info.completedDate);
+      const diff = Math.round((d2 - d1) / 86400000);
+      if (diff >= 0) { avgDays += diff; dayCount++; }
+    }
+  }
+  const avgDaysStr = dayCount > 0 ? Math.round(avgDays / dayCount) + '일' : '-';
+
+  document.getElementById('dashProgress').innerHTML = `
+    <h3>생산 관리 진행률</h3>
+    <div class="progress-ring-wrap">
+      <div class="progress-ring">
+        <svg width="100" height="100">
+          <circle class="ring-bg" cx="50" cy="50" r="42"/>
+          <circle class="ring-fg" cx="50" cy="50" r="42" style="stroke:${progressColor};stroke-dasharray:${circumference};stroke-dashoffset:${offset}"/>
+        </svg>
+        <div class="ring-text" style="color:${progressColor}">${progressPct}%</div>
+      </div>
+      <div class="progress-detail">
+        선생산 필요: <strong style="color:#ef4444">${activeItems.length}</strong><br>
+        생산지시 중: <strong>${graveItems.length}</strong><br>
+        생산지시 완료: <strong style="color:#a78bfa">${completedItems.length}</strong><br>
+        재고 충분: <strong style="color:#22c55e">${stockedItems.length}</strong><br>
+        평균 처리기간: <strong style="color:#3b82f6">${avgDaysStr}</strong>
+      </div>
+    </div>`;
+
+  // ── 5. 긴급 TOP 5 ──
+  const urgent5 = [...activeItems].sort((a,b) => b.score - a.score).slice(0, 5);
+  document.getElementById('dashUrgent').innerHTML = `
+    <h3>긴급 TOP 5</h3>
+    ${urgent5.length === 0 ? '<div style="text-align:center;color:#475569;padding:20px">긴급 품목 없음</div>' : `
+    <table class="urgent-table">
+      <thead><tr><th>치수</th><th>재질</th><th>재고</th><th>점수</th><th>주문</th></tr></thead>
+      <tbody>
+        ${urgent5.map(r => {
+          const sc = getStockClass(r);
+          const scColor = sc === 'danger' ? '#ef4444' : sc === 'warn' ? '#f59e0b' : '#22c55e';
+          const jc = jaejilColors[r.jaejil] || '#475569';
+          return `<tr>
+            <td class="u-chisu clickable" onclick="searchAndJump('${r.key}')">${r.chisu}</td>
+            <td><span class="u-badge" style="background:${jc}">${r.jaejil}</span></td>
+            <td class="u-stock" style="color:${scColor}">${r.stock >= 0 ? r.stock+'개' : '-'}</td>
+            <td class="u-score">${r.score}</td>
+            <td style="color:#94a3b8">${r.freq}회</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`}`;
+}
+
+function searchAndJump(key) {
+  document.querySelectorAll('.card.highlight').forEach(el => el.classList.remove('highlight'));
+  const cardId = 'card-' + key.replace(/[*|.]/g, '_');
+  const cardEl = document.getElementById(cardId);
+  if (cardEl) {
+    const section = cardEl.closest('.section');
+    if (section) {
+      const grid = section.querySelector('.grid');
+      if (grid && grid.style.display === 'none') {
+        const names = {secActive:'active',secGrave:'grave',secCompleted:'completed',secStocked:'stocked',secProd:'prod'};
+        const n = names[section.id];
+        if (n) toggleSection(n);
+      }
+    }
+    cardEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    cardEl.classList.add('highlight');
+    setTimeout(() => cardEl.classList.remove('highlight'), 5000);
+  }
 }
 
 function sendToGrave(key) {
@@ -636,10 +1053,11 @@ function autoRemoveGraveyard() {
 }
 
 function autoCleanCompleted() {
+  // 고정 기준 30%로 판정 (슬라이더 영향 없음)
   let removed = 0;
   for (const key of Object.keys(completed)) {
     const item = ITEMS.find(r => r.key === key);
-    if (item && item.stock >= 0 && item.stock_ratio > filterStock) {
+    if (item && item.stock >= 0 && item.stock_ratio > STOCK_THRESHOLD) {
       delete completed[key];
       removed++;
     }
@@ -1208,6 +1626,7 @@ loadGraveyardFromSheet(function() {
     autoRemoveGraveyard();
     autoCleanCompleted();
     syncToServer();  // graveyard 상태를 서버에 저장 (refresh.py 연동)
+    populateJaejilSelect();
     render();
     loadHistory();
   });
