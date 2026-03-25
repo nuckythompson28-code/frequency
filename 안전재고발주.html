@@ -277,8 +277,8 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
     <button class="freq-btn" onclick="setFreq(20)">20</button>
     <button class="freq-btn" onclick="setFreq(25)">25</button>
     <button class="freq-btn" onclick="setFreq(30)">30</button>
-    <input type="range" id="fFreq" min="1" max="30" value="10" oninput="applyFilter()">
-    <span class="fv" id="fFreqVal">10</span><span style="color:#64748b;font-size:11px">회</span>
+    <input type="range" id="fFreq" min="1" max="30" value="8" oninput="applyFilter()">
+    <span class="fv" id="fFreqVal">8</span><span style="color:#64748b;font-size:11px">회</span>
   </div>
   <div class="filter-div"></div>
   <div class="fi"><label>재고율 ≤</label>
@@ -508,7 +508,7 @@ function searchItem() {
   }
 }
 
-let filterFreq = 5, filterStock = 30, filterScore = 0, filterQty = 500;
+let filterFreq = 8, filterStock = 30, filterScore = 0, filterQty = 500;
 
 function setFreq(val) {
   filterFreq = val;
@@ -559,11 +559,46 @@ function clearExcel() {
 const STORAGE_KEY = 'soltri_graveyard';
 const COMPLETED_KEY = 'soltri_completed';
 const ARCHIVED_KEY = 'soltri_archived';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhw9T59Mz4fexemVpw1HKQq6GyivaT8OT1DYNntzzsVLIWJfsaE1Y2L_NVt4w5M06tzA/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRiVeUmM1yZZs3GEzB0Y1y-EhVvSNM6Y7jJEXGBtYqhmZlAJcbrNoQBw82M36w6ozebQ/exec';
 let graveyard = {};
 let completed = {};
 let archived = {};  // 재고 충분으로 졸업한 이력 보존
 let undoStack = [];
+
+// ── PC 식별자 (hostname + user-agent 요약) ──
+const PC_ID = (function() {
+  const ua = navigator.userAgent;
+  const os = ua.includes('Windows') ? 'Win' : ua.includes('Mac') ? 'Mac' : 'Other';
+  const browser = ua.includes('Edg/') ? 'Edge' : ua.includes('Chrome') ? 'Chrome' : ua.includes('Firefox') ? 'Firefox' : 'Other';
+  const stored = localStorage.getItem('soltri_pc_name');
+  if (stored) return stored;
+  const name = os + '/' + browser + '/' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  localStorage.setItem('soltri_pc_name', name);
+  return name;
+})();
+
+// ── 변경 로그 전송 ──
+function sendLog(action, key, from, to, note) {
+  if (!APPS_SCRIPT_URL) return;
+  const parts = key.split('|');
+  const log = [{
+    timestamp: new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul', hour12:false}),
+    action: action,
+    chisu: parts[0] || key,
+    jaejil: parts[1] || '',
+    from: from,
+    to: to,
+    pc: PC_ID,
+    note: note || ''
+  }];
+  const data = encodeURIComponent(JSON.stringify(log));
+  const cbName = '_log_' + Date.now();
+  window[cbName] = function() { delete window[cbName]; try { document.body.removeChild(sc); } catch(e){} };
+  const sc = document.createElement('script');
+  sc.src = `${APPS_SCRIPT_URL}?action=log&data=${data}&callback=${cbName}`;
+  sc.onerror = () => { delete window[cbName]; };
+  document.body.appendChild(sc);
+}
 
 function saveLocal() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(graveyard));
@@ -713,6 +748,7 @@ function runAutoCleanOnce() {
         jaejil: item.jaejil
       };
       delete completed[key];
+      sendLog('자동졸업', key, '생산지시 완료', '재고 충분', '재고율=' + item.stock_ratio + '%');
       autoMoved++;
     }
   }
@@ -1083,9 +1119,12 @@ function searchAndJump(key) {
 
 function sendToGrave(key) {
   if (isInGrave(key)) return;
-  graveyard[key] = new Date().toISOString();  // "2026-03-20T09:30:00.000Z" 시간까지 저장
+  const item = ITEMS.find(r => r.key === key);
+  const fromState = item && item.in_production ? '이미 생산중' : '선생산 필요';
+  graveyard[key] = new Date().toISOString();
   undoStack.push({ action: 'send', key });
   save();
+  sendLog('생산지시', key, fromState, '생산지시 중');
   showToast('생산지시 중 처리됨');
   render();
 }
@@ -1095,6 +1134,7 @@ function reviveFromGrave(key) {
   delete graveyard[key];
   undoStack.push({ action: 'revive', key, oldDate });
   save();
+  sendLog('복귀', key, '생산지시 중', '선생산 필요');
   showToast('선생산 리스트로 복귀');
   render();
 }
@@ -1108,6 +1148,7 @@ function markCompleted(key) {
   undoStack.push({ action: 'complete', key, graveDate });
   save();
   saveCompleted();
+  sendLog('완료', key, '생산지시 중', '생산지시 완료', '수동완료');
   showToast('생산지시 완료 처리됨');
   render();
 }
@@ -1117,13 +1158,15 @@ function undoLast() {
   const last = undoStack.pop();
   if (last.action === 'send') {
     delete graveyard[last.key];
+    sendLog('되돌리기', last.key, '생산지시 중', '선생산 필요', 'Undo');
   } else if (last.action === 'complete') {
-    // 완료 → 생산지시 중으로 복귀
     graveyard[last.key] = last.graveDate || new Date().toISOString();
     delete completed[last.key];
     saveCompleted();
+    sendLog('되돌리기', last.key, '생산지시 완료', '생산지시 중', 'Undo');
   } else {
     graveyard[last.key] = last.oldDate || '';
+    sendLog('되돌리기', last.key, '선생산 필요', '생산지시 중', 'Undo');
   }
   save();
   showToast('되돌리기 완료');
@@ -1138,6 +1181,7 @@ function autoRemoveGraveyard() {
     if (item && item.latest_balju && graveDate && item.latest_balju >= graveDate) {
       completed[key] = { graveDate, completedDate: item.latest_balju };
       delete graveyard[key];
+      sendLog('자동완료', key, '생산지시 중', '생산지시 완료', '발주일=' + item.latest_balju);
       removed++;
     }
   }
@@ -1372,7 +1416,7 @@ function downloadExcel() {
     }
     function mg(r1,c1,r2,c2){ merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
 
-    // Row 1: 라벨 출고용 A1:I1
+    // Row 1: ��벨 출고용 A1:I1
     p(0,0,'라벨 출고용', {bold:true, align:'center'}); mg(0,0,0,8);
 
     // Row 2: SHIPPER A2:B2 / NO & DATE D2:F2
@@ -1393,10 +1437,10 @@ function downloadExcel() {
 
     // Row 5
     p(4,0,'INCHEON KOREA TEL : 82-32-761-2323');
-    p(4,10,'제품정보는 " * "로 되어있어야 하고, 인보이스 엑셀은 "X" 또는 "x"로 되어있어야 됨');
+    p(4,10,'제품정보는 " * "로 되어있어야 하고, 인보이�� 엑셀은 "X" 또는 "x"로 되어있어야 됨');
     p(4,17,'M'); p(4,18,'MOSTUF');
 
-    // Row 6: 업체명 A6:B6 / 발주번호 D6:F6 + 주의사항/품목표시
+    // Row 6: 업체명 A6:B6 / 발주번호 D6:F6 + 주의사���/품목표시
     p(5,0,'업체명', {bold:true, align:'center'}); mg(5,0,5,1);
     p(5,3,'발주일', {bold:true, align:'center'}); mg(5,3,5,5);
     p(5,10,'가지수가 많을경우 삽입해서 해도 됨');
