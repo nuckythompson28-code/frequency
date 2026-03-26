@@ -1357,10 +1357,10 @@ function downloadExcel() {
       const row = 18 + i;
       const chisu = item.chisu.replace(/\*/g, ' x ');
       const jaejil = 'W/' + item.jaejil;
-      // G1: 8회+, 총량≤500 → 부족분(총량-현재고), G2: 13회+, 총량≤1000 → 최대 500
+      // G1: 총량≤500 → 부족분(총량-현재고), 총량>500 → 최대 500개
       const stk = item.stock >= 0 ? item.stock : 0;
       let rawQty;
-      if (item.freq >= 13 && item.total_qty > 500) {
+      if (item.total_qty > 500) {
         rawQty = Math.min(500, Math.max(0, item.total_qty - stk));
       } else {
         rawQty = Math.max(0, item.total_qty - stk);
