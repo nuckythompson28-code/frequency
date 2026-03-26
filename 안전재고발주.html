@@ -267,19 +267,18 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
 </div>
 
 <div class="filter-bar">
+  <button class="btn-sel" id="btnAll" onclick="setGroup('all')" style="background:#1e293b;border:1px solid #3b82f6;color:#60a5fa">모두</button>
+  <button class="btn-sel" id="btnG1" onclick="setGroup('g1')" style="background:#1e293b;border:1px solid #3b82f6;color:#60a5fa">G1 (8+/≤500)</button>
+  <button class="btn-sel" id="btnG2" onclick="setGroup('g2')" style="background:#1e293b;border:1px solid #f59e0b;color:#fbbf24">G2 (13+/≤1000)</button>
+  <div class="filter-div"></div>
   <div class="fi"><label>주문횟수 ≥</label>
-    <input type="range" id="fFreq" min="1" max="50" value="10" oninput="applyFilter()">
-    <span class="fv" id="fFreqVal">10</span><span style="color:#64748b;font-size:11px">회</span>
+    <input type="range" id="fFreq" min="1" max="50" value="8" oninput="applyFilter()">
+    <span class="fv" id="fFreqVal">8</span><span style="color:#64748b;font-size:11px">회</span>
   </div>
   <div class="filter-div"></div>
   <div class="fi"><label>재고율 ≤</label>
     <input type="range" id="fStock" min="0" max="100" value="30" oninput="applyFilter()">
     <span class="fv" id="fStockVal">30</span><span style="color:#64748b;font-size:11px">%</span>
-  </div>
-  <div class="filter-div"></div>
-  <div class="fi"><label>점수 ≥</label>
-    <input type="range" id="fScore" min="0" max="100" value="0" oninput="applyFilter()">
-    <span class="fv" id="fScoreVal">0</span>
   </div>
   <div class="filter-div"></div>
   <div class="fi"><label>총량 ≤</label>
@@ -290,7 +289,6 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#0f172a;color:
   <button class="btn-sel" onclick="selectAllActive()">전체 선택 →엑셀</button>
   <button class="btn-clr" onclick="clearExcel()">선택 해제</button>
   <span id="filterCount" style="font-size:11px;color:#64748b;margin-left:4px"></span>
-  <span style="font-size:10px;color:#475569;margin-left:8px">* 필터는 화면 표시만 변경 (데이터 영향 없음)</span>
 </div>
 
 <div class="search-bar no-print">
@@ -504,16 +502,39 @@ function searchItem() {
   }
 }
 
-let filterFreq = 5, filterStock = 30, filterScore = 0, filterQty = 500;
+let filterFreq = 8, filterStock = 30, filterScore = 0, filterQty = 500;
+let activeGroup = 'all';  // 'all', 'g1', 'g2'
+
+function setGroup(group) {
+  activeGroup = group;
+  if (group === 'g1') {
+    filterFreq = 8; filterQty = 500;
+  } else if (group === 'g2') {
+    filterFreq = 13; filterQty = 1000;
+  } else {
+    filterFreq = 8; filterQty = 500;
+  }
+  document.getElementById('fFreq').value = filterFreq;
+  document.getElementById('fFreqVal').textContent = filterFreq;
+  document.getElementById('fQty').value = filterQty;
+  // 버튼 활성화 표시
+  document.getElementById('btnAll').style.opacity = group === 'all' ? '1' : '0.4';
+  document.getElementById('btnG1').style.opacity = group === 'g1' ? '1' : '0.4';
+  document.getElementById('btnG2').style.opacity = group === 'g2' ? '1' : '0.4';
+  render();
+}
 
 function applyFilter() {
   filterFreq  = parseInt(document.getElementById('fFreq').value)  || 1;
   filterStock = parseInt(document.getElementById('fStock').value) || 0;
-  filterScore = parseInt(document.getElementById('fScore').value) || 0;
   filterQty   = parseInt(document.getElementById('fQty').value)   || 9999;
   document.getElementById('fFreqVal').textContent  = filterFreq;
   document.getElementById('fStockVal').textContent = filterStock;
-  document.getElementById('fScoreVal').textContent = filterScore;
+  // 슬라이더 수동 조작 시 그룹 버튼 해제
+  document.getElementById('btnAll').style.opacity = '0.4';
+  document.getElementById('btnG1').style.opacity = '0.4';
+  document.getElementById('btnG2').style.opacity = '0.4';
+  activeGroup = 'custom';
   render();
 }
 
