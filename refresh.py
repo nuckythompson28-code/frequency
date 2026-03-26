@@ -410,9 +410,6 @@ try:
             if prev_ratio > 10 and r['stock_ratio'] <= 10:
                 stock_alert.append(r)
 
-    # 선생산 필요 목록 (in_production=False, 재고율 30% 이하)
-    active_list = [r for r in items if not r['in_production'] and r.get('stock_ratio', 100) <= 30]
-
     has_changes = new_keys or removed_keys or stock_alert
     print(f"  신규: {len(new_keys)}개, 제거: {len(removed_keys)}개, 재고소진경고: {len(stock_alert)}개")
 
@@ -420,59 +417,50 @@ try:
     import shutil
     shutil.copy2(f'{OUT}/data_wr.json', PREV_FILE)
 
-    if has_changes or active_list:
+    if has_changes:
         import win32com.client as win32
 
-        # 이메일 본문 구성
         body = f'<html><body style="font-family:Malgun Gothic,sans-serif;font-size:13px;color:#1a1a1a">'
-        body += f'<h2 style="color:#1e3a5f;border-bottom:2px solid #3b82f6;padding-bottom:6px">Soltri 선생산 리포트 ({TODAY.strftime("%Y-%m-%d %H:%M")})</h2>'
+        body += f'<h2 style="color:#1e3a5f;border-bottom:2px solid #3b82f6;padding-bottom:6px">Soltri 선생산 변경 알림 ({TODAY.strftime("%Y-%m-%d %H:%M")})</h2>'
+
+        if stock_alert:
+            body += f'<h3 style="color:#f59e0b">⚠️ 재고 소진 경고 ({len(stock_alert)}개)</h3>'
+            body += '<p style="font-size:11px;color:#666">재고율이 10% 이하로 떨어진 품목</p>'
+            body += '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
+            body += '<tr style="background:#fff8e1"><th>치수</th><th>재질</th><th>현재고</th><th>재고율</th><th>주문횟수</th><th>총량</th></tr>'
+            for r in stock_alert:
+                body += f'<tr><td>{r["chisu"]}</td><td>{r["jaejil"]}</td><td>{r["stock"]}개</td><td style="color:#ef4444;font-weight:bold">{r["stock_ratio"]}%</td><td>{r["freq"]}회</td><td>{r["total_qty"]}</td></tr>'
+            body += '</table><br>'
 
         if new_keys:
-            body += f'<h3 style="color:#22c55e">🟢 신규 품목 ({len(new_keys)}개)</h3><table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
-            body += '<tr style="background:#e8f5e9"><th>치수</th><th>재질</th><th>주문횟수</th><th>총량</th><th>현재고</th></tr>'
-            for k in new_keys[:20]:
+            body += f'<h3 style="color:#22c55e">🟢 신규 품목 ({len(new_keys)}개)</h3>'
+            body += '<p style="font-size:11px;color:#666">새로 선생산 대상에 추가된 품목</p>'
+            body += '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
+            body += '<tr style="background:#e8f5e9"><th>치수</th><th>재질</th><th>주문횟수</th><th>총량</th><th>현재고</th><th>재고율</th></tr>'
+            for k in new_keys:
                 r = curr_items[k]
-                body += f'<tr><td>{r["chisu"]}</td><td>{r["jaejil"]}</td><td>{r["freq"]}회</td><td>{r["total_qty"]}</td><td>{r["stock"]}</td></tr>'
+                body += f'<tr><td>{r["chisu"]}</td><td>{r["jaejil"]}</td><td>{r["freq"]}회</td><td>{r["total_qty"]}</td><td>{r["stock"]}</td><td>{r["stock_ratio"]}%</td></tr>'
             body += '</table><br>'
 
         if removed_keys:
-            body += f'<h3 style="color:#ef4444">🔴 제거된 품목 ({len(removed_keys)}개)</h3><table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
-            body += '<tr style="background:#fce4ec"><th>치수</th><th>재질</th></tr>'
-            for k in removed_keys[:20]:
+            body += f'<h3 style="color:#94a3b8">제거된 품목 ({len(removed_keys)}개)</h3>'
+            body += '<p style="font-size:11px;color:#666">조건 미달로 목록에서 빠진 품목</p>'
+            body += '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
+            body += '<tr style="background:#f1f5f9"><th>치수</th><th>재질</th></tr>'
+            for k in removed_keys:
                 parts = k.split('|')
                 body += f'<tr><td>{parts[0]}</td><td>{parts[1] if len(parts)>1 else ""}</td></tr>'
             body += '</table><br>'
 
-        if stock_alert:
-            body += f'<h3 style="color:#f59e0b">⚠️ 재고 소진 경고 ({len(stock_alert)}개)</h3><table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
-            body += '<tr style="background:#fff8e1"><th>치수</th><th>재질</th><th>현재고</th><th>재고율</th></tr>'
-            for r in stock_alert[:20]:
-                body += f'<tr><td>{r["chisu"]}</td><td>{r["jaejil"]}</td><td>{r["stock"]}</td><td>{r["stock_ratio"]}%</td></tr>'
-            body += '</table><br>'
-
-        # 선생산 필요 TOP 10
-        top10 = sorted(active_list, key=lambda x: x['score'], reverse=True)[:10]
-        if top10:
-            body += f'<h3 style="color:#3b82f6">📋 선생산 필요 TOP 10 (점수순)</h3><table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px">'
-            body += '<tr style="background:#e3f2fd"><th>#</th><th>치수</th><th>재질</th><th>주문</th><th>총량</th><th>현재고</th><th>재고율</th><th>점수</th></tr>'
-            for i, r in enumerate(top10, 1):
-                bg = '#fff5f5' if r['stock_ratio'] <= 10 else '#ffffff'
-                body += f'<tr style="background:{bg}"><td>{i}</td><td>{r["chisu"]}</td><td>{r["jaejil"]}</td><td>{r["freq"]}회</td><td>{r["total_qty"]}</td><td>{r["stock"]}</td><td>{r["stock_ratio"]}%</td><td>{r["score"]}</td></tr>'
-            body += '</table><br>'
-
-        body += f'<p style="color:#94a3b8;font-size:11px">총 {len(items)}개 품목 | 선생산 필요 {len(active_list)}개 | <a href="https://nuckythompson28-code.github.io/frequency/안전재고발주.html">대시보드 열기</a></p>'
+        body += f'<p style="margin-top:16px"><a href="https://nuckythompson28-code.github.io/frequency/안전재고발주.html" style="background:#3b82f6;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:bold">대시보드 열기</a></p>'
         body += '</body></html>'
 
         # 제목
-        subject = f'[선생산] '
         changes = []
+        if stock_alert: changes.append(f'⚠️재고소진 {len(stock_alert)}')
         if new_keys: changes.append(f'신규 {len(new_keys)}')
         if removed_keys: changes.append(f'제거 {len(removed_keys)}')
-        if stock_alert: changes.append(f'재고소진 {len(stock_alert)}')
-        if changes:
-            subject += ', '.join(changes) + f' | 선생산 필요 {len(active_list)}개'
-        else:
-            subject += f'선생산 필요 {len(active_list)}개 ({TODAY.strftime("%m/%d")})'
+        subject = f'[선생산] {", ".join(changes)}'
 
         # Outlook 발송
         outlook = win32.Dispatch('Outlook.Application')
