@@ -542,11 +542,40 @@ function clearExcel() {
 const STORAGE_KEY = 'soltri_graveyard';
 const COMPLETED_KEY = 'soltri_completed';
 const ARCHIVED_KEY = 'soltri_archived';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhw9T59Mz4fexemVpw1HKQq6GyivaT8OT1DYNntzzsVLIWJfsaE1Y2L_NVt4w5M06tzA/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRiVeUmM1yZZs3GEzB0Y1y-EhVvSNM6Y7jJEXGBtYqhmZlAJcbrNoQBw82M36w6ozebQ/exec';
 let graveyard = {};
 let completed = {};
 let archived = {};  // 재고 충분으로 졸업한 이력 보존
 let undoStack = [];
+
+// PC 식별자
+const PC_ID = (function() {
+  const stored = localStorage.getItem('soltri_pc_name');
+  if (stored) return stored;
+  const ua = navigator.userAgent;
+  const os = ua.includes('Windows') ? 'Win' : ua.includes('Mac') ? 'Mac' : 'Other';
+  const br = ua.includes('Edg/') ? 'Edge' : ua.includes('Chrome') ? 'Chrome' : 'Firefox';
+  const name = os + '/' + br + '/' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  localStorage.setItem('soltri_pc_name', name);
+  return name;
+})();
+
+function sendLog(action, key, from, to, note) {
+  if (!APPS_SCRIPT_URL) return;
+  const parts = key.split('|');
+  const log = [{
+    timestamp: new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul', hour12:false}),
+    action, chisu: parts[0] || key, jaejil: parts[1] || '',
+    from, to, pc: PC_ID, note: note || ''
+  }];
+  const data = encodeURIComponent(JSON.stringify(log));
+  const cbName = '_log_' + Date.now();
+  window[cbName] = function() { delete window[cbName]; try { document.body.removeChild(sc); } catch(e){} };
+  const sc = document.createElement('script');
+  sc.src = `${APPS_SCRIPT_URL}?action=log&data=${data}&callback=${cbName}`;
+  sc.onerror = () => { delete window[cbName]; };
+  document.body.appendChild(sc);
+}
 
 function saveLocal() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(graveyard));
@@ -1066,9 +1095,12 @@ function searchAndJump(key) {
 
 function sendToGrave(key) {
   if (isInGrave(key)) return;
-  graveyard[key] = new Date().toISOString();  // "2026-03-20T09:30:00.000Z" 시간까지 저장
+  const item = ITEMS.find(r => r.key === key);
+  const fromState = item && item.in_production ? '이미 생산중' : '선생산 필요';
+  graveyard[key] = new Date().toISOString();
   undoStack.push({ action: 'send', key });
   save();
+  sendLog('생산지시', key, fromState, '생산지시 중');
   showToast('생산지시 중 처리됨');
   render();
 }
@@ -1078,6 +1110,7 @@ function reviveFromGrave(key) {
   delete graveyard[key];
   undoStack.push({ action: 'revive', key, oldDate });
   save();
+  sendLog('복귀', key, '생산지시 중', '선생산 필요');
   showToast('선생산 리스트로 복귀');
   render();
 }
@@ -1091,6 +1124,7 @@ function markCompleted(key) {
   undoStack.push({ action: 'complete', key, graveDate });
   save();
   saveCompleted();
+  sendLog('완료', key, '생산지시 중', '생산지시 완료', '수동완료');
   showToast('생산지시 완료 처리됨');
   render();
 }
@@ -1100,13 +1134,15 @@ function undoLast() {
   const last = undoStack.pop();
   if (last.action === 'send') {
     delete graveyard[last.key];
+    sendLog('되돌리기', last.key, '생산지시 중', '선생산 필요', 'Undo');
   } else if (last.action === 'complete') {
-    // 완료 → 생산지시 중으로 복귀
     graveyard[last.key] = last.graveDate || new Date().toISOString();
     delete completed[last.key];
     saveCompleted();
+    sendLog('되돌리기', last.key, '생산지시 완료', '생산지시 중', 'Undo');
   } else {
     graveyard[last.key] = last.oldDate || '';
+    sendLog('되돌리기', last.key, '선생산 필요', '생산지시 중', 'Undo');
   }
   save();
   showToast('되돌리기 완료');
@@ -1121,6 +1157,7 @@ function autoRemoveGraveyard() {
     if (item && item.latest_balju && graveDate && item.latest_balju >= graveDate) {
       completed[key] = { graveDate, completedDate: item.latest_balju };
       delete graveyard[key];
+      sendLog('자동완료', key, '생산지시 중', '생산지시 완료', '발주일=' + item.latest_balju);
       removed++;
     }
   }
@@ -1137,6 +1174,7 @@ function autoCleanCompleted() {
   for (const key of Object.keys(completed)) {
     const item = ITEMS.find(r => r.key === key);
     if (item && item.stock >= 0 && item.stock_ratio > STOCK_THRESHOLD) {
+      sendLog('자동졸업', key, '생산지시 완료', '재고 충분', '재고율=' + item.stock_ratio + '%');
       delete completed[key];
       removed++;
     }
