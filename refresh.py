@@ -125,16 +125,22 @@ try:
     rows3 = list(ws3.iter_rows(values_only=True))
     wb3.close()
 
+    skipped = 0
     for r in rows3[2:]:
         start_date = r[4]
         chisu = r[6]
         jaejil = r[7]
+        gagu_gubun = str(r[11]) if r[11] else ''
         if not chisu or not jaejil or not start_date:
+            continue
+        # 재고출하 제외, 생산지시만 포함
+        if '재고출하' in gagu_gubun:
+            skipped += 1
             continue
         if isinstance(start_date, datetime) and start_date >= WEEK_AGO:
             recent_production.add((str(chisu), str(jaejil)))
 
-    print(f"  → {len(rows3)-2}건, 최근 7일 생산: {len(recent_production)}개")
+    print(f"  → {len(rows3)-2}건, 재고출하 제외 {skipped}건, 최근 7일 생산: {len(recent_production)}개")
 except Exception as e:
     print(f"  → 가공작업조회 로드 실패: {e}")
 
