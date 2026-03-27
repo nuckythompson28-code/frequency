@@ -57,15 +57,16 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
 .hist-header h2{font-size:16px;color:#1e3a5f}
 .hist-count{font-size:13px;color:#64748b}
 .hist-scroll{flex:1;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.hist-scroll table{width:100%;border-collapse:collapse}
-.hist-scroll th{position:sticky;top:0;background:#1e3a5f;color:#fff;padding:10px 12px;text-align:left;font-size:13px;font-weight:600;z-index:1}
-.hist-scroll td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:14px}
-.hist-scroll tr:hover td{background:#f8fafc}
-.hist-scroll .date{color:#3b82f6;font-weight:600;white-space:nowrap}
-.hist-scroll .cust{color:#334155}
-.hist-scroll .qty{font-weight:700;color:#1e3a5f;text-align:right}
-.hist-scroll .order{font-size:11px;color:#94a3b8}
-.hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:16px}
+.hist-scroll{padding:8px}
+.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;margin-bottom:6px}
+.hist-card:hover{background:#f8fafc}
+.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:18px}
+.hist-line1 .h-date{color:#3b82f6;font-weight:700}
+.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:20px}
+.hist-line2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:14px;color:#64748b}
+.hist-line2 .h-cust{color:#334155;font-weight:600}
+.hist-line2 .h-order{font-size:12px;color:#94a3b8}
+.hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:18px}
 
 /* 고빈도 카드 */
 .freq-item{background:#fff;border:2px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
@@ -330,30 +331,18 @@ function renderResults(results, chisu, mat) {
     </div>
   `;
 
-  // 이력 테이블
+  // 이력 카드
   histCount.textContent = results.length + '건';
-  histScroll.innerHTML = `
-    <table>
-      <thead><tr>
-        <th style="width:100px">발송일</th>
-        <th>거래처</th>
-        <th>주문번호</th>
-        <th style="width:60px">소재</th>
-        <th style="width:60px">품목</th>
-        <th style="width:70px;text-align:right">수량</th>
-      </tr></thead>
-      <tbody>
-        ${results.map(r => `<tr>
-          <td class="date">${r.ship_date || '-'}</td>
-          <td class="cust">${r.customer || ''}</td>
-          <td class="order">${r.order_no || ''}</td>
-          <td>${r.jaejil || ''}</td>
-          <td>${r.pumok || ''}</td>
-          <td class="qty">${(r.qty || 0).toLocaleString()}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  `;
+  histScroll.innerHTML = results.map(r => `<div class="hist-card">
+    <div class="hist-line1">
+      <span class="h-date">${r.ship_date || '-'}</span>
+      <span class="h-qty">${(r.qty || 0).toLocaleString()}개</span>
+    </div>
+    <div class="hist-line2">
+      <span class="h-cust">${r.customer || ''}</span>
+      <span class="h-order">${r.jaejil} · ${r.pumok || ''}</span>
+    </div>
+  </div>`).join('');
 }
 
 function doClear() {
