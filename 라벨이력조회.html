@@ -67,6 +67,21 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
 .hist-scroll .order{font-size:11px;color:#94a3b8}
 .hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:16px}
 
+/* 고빈도 카드 */
+.freq-item{background:#fff;border:2px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.freq-item:hover{border-color:#3b82f6;background:#f8fafc}
+.freq-item.active{border-color:#3b82f6;background:#eff6ff}
+.freq-item .fi-chisu{font-size:14px;font-weight:800;color:#1e3a5f}
+.freq-item .fi-row{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.freq-item .fi-jaejil{font-size:11px;padding:1px 6px;border-radius:4px;font-weight:700;color:#fff}
+.fi-CN10{background:#b8860b}.fi-RS40{background:#0d9488}.fi-CM20{background:#6b7280}.fi-CN20{background:#8b5cf6}
+.freq-item .fi-info{font-size:10px;color:#94a3b8}
+.freq-item .fi-stock{font-size:13px;font-weight:800;margin-top:3px}
+.fi-stock.danger{color:#ef4444}
+.fi-stock.warn{color:#f59e0b}
+.fi-stock.ok{color:#22c55e}
+.fi-stock.unknown{color:#94a3b8}
+
 /* 반응형 */
 @media(max-width:768px){
   .content{flex-direction:column;height:auto}
@@ -118,13 +133,21 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
   <div class="search-hint">내경 → Enter → 외경 → Enter → 높이 → Enter → 소재 → Enter로 바로 검색됩니다</div>
 </div>
 
-<!-- 하단 -->
+<!-- 하단 3컬럼 -->
 <div class="content">
-  <!-- 왼쪽: 소재 정보 -->
-  <div class="left">
+  <!-- 왼쪽: 고빈도 품목 카드 -->
+  <div class="left" style="width:240px">
+    <div class="mat-card" id="freqCard">
+      <h2 style="font-size:14px">고빈도 품목 <span style="font-size:11px;color:#94a3b8;font-weight:400" id="freqLoading">로딩중...</span></h2>
+      <div id="freqList" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- 가운데: 소재 정보 -->
+  <div style="width:280px;flex-shrink:0">
     <div class="mat-card" id="matCard">
       <h2>소재 정보</h2>
-      <div class="empty" id="matEmpty">치수를 입력하고<br>검색하세요</div>
+      <div class="empty" id="matEmpty">← 카드를 클릭하거나<br>위에서 검색하세요</div>
       <div id="matContent" style="display:none"></div>
     </div>
   </div>
@@ -346,14 +369,74 @@ function doClear() {
   document.getElementById('inD1').focus();
 }
 
+// 고빈도 품목 카드 렌더링
+function renderFreqCards() {
+  const freqList = document.getElementById('freqList');
+  const freqLoading = document.getElementById('freqLoading');
+  if (!ALL_DATA.length) {
+    freqLoading.textContent = '로딩중...';
+    setTimeout(renderFreqCards, 500);
+    return;
+  }
+  freqLoading.textContent = '';
+
+  // 치수+재질별 빈도 집계
+  const freqMap = {};
+  ALL_DATA.forEach(r => {
+    const key = r.chisu + '|' + r.jaejil;
+    if (!freqMap[key]) freqMap[key] = { chisu: r.chisu, jaejil: r.jaejil, count: 0, totalQty: 0 };
+    freqMap[key].count++;
+    freqMap[key].totalQty += (r.qty || 0);
+  });
+
+  // 빈도순 정렬, 상위 50개
+  const sorted = Object.values(freqMap).sort((a, b) => b.count - a.count).slice(0, 50);
+
+  freqList.innerHTML = sorted.map(item => {
+    const stockKey = item.chisu + '|' + item.jaejil;
+    const stk = STOCK[stockKey];
+    const hasStock = stk !== undefined;
+    const stockClass = !hasStock ? 'unknown' : stk <= 10 ? 'danger' : stk <= 50 ? 'warn' : 'ok';
+    const stockText = hasStock ? stk + '개' : '-';
+    const jaejilClass = 'fi-' + item.jaejil.replace(/[^A-Z0-9]/g, '');
+
+    return `<div class="freq-item" onclick="selectFreqCard('${item.chisu}','${item.jaejil}',this)">
+      <div class="fi-chisu">${item.chisu}</div>
+      <div class="fi-row">
+        <span class="fi-jaejil ${jaejilClass}">${item.jaejil}</span>
+        <span class="fi-info">${item.count}회 / ${item.totalQty}개</span>
+      </div>
+      <div class="fi-stock ${stockClass}">재고: ${stockText}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectFreqCard(chisu, jaejil, el) {
+  // 카드 활성화 표시
+  document.querySelectorAll('.freq-item').forEach(e => e.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // 입력칸에 반영
+  const parts = chisu.split('*');
+  document.getElementById('inD1').value = parts[0] || '';
+  document.getElementById('inD2').value = parts[1] || '';
+  document.getElementById('inD3').value = parts[2] || '';
+  document.getElementById('inMat').value = jaejil.replace(/\(.*/, '');  // CN10(xxx) → CN10
+
+  doSearch();
+}
+
 // 페이지 로드
 window.onload = function() {
   if (typeof DATA_LABEL !== 'undefined' && DATA_LABEL.length > 0) {
     ALL_DATA = DATA_LABEL;
     if (typeof STOCK_LOOKUP !== 'undefined') STOCK = STOCK_LOOKUP;
     console.log('로컬 로드:', ALL_DATA.length + '건');
+    renderFreqCards();
   } else {
     loadData();
+    // Google Sheets 로드 후 카드 렌더링 (약간 딜레이)
+    setTimeout(renderFreqCards, 2000);
   }
   document.getElementById('inD1').focus();
 };
