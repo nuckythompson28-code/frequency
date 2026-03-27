@@ -389,8 +389,8 @@ function renderFreqCards() {
     freqMap[key].totalQty += (r.qty || 0);
   });
 
-  // 빈도순 정렬, 상위 50개
-  const sorted = Object.values(freqMap).sort((a, b) => b.count - a.count).slice(0, 50);
+  // 총주문량 1000 이상 제외 (고빈도 소량만), 빈도순 상위 50개
+  const sorted = Object.values(freqMap).filter(a => a.totalQty < 1000).sort((a, b) => b.count - a.count).slice(0, 50);
 
   freqList.innerHTML = sorted.map(item => {
     const stockKey = item.chisu + '|' + item.jaejil;
