@@ -233,6 +233,46 @@ with open(f'{OUT}/data_wr.js', 'w', encoding='utf-8') as f:
 active = [r for r in items if not r['in_production']]
 in_prod = [r for r in items if r['in_production']]
 
+# ── 라벨이력 조회용 데이터 (label_data.json / label_data.js) ──
+label_items = []
+for r in data:
+    chisu = r[4]
+    jaejil = r[5]
+    if not chisu or not jaejil:
+        continue
+    order_date = r[2]
+    ship_date = r[3]
+    od = order_date.strftime('%Y-%m-%d') if isinstance(order_date, datetime) else str(order_date)[:10] if order_date else ''
+    sd = ship_date.strftime('%Y-%m-%d') if isinstance(ship_date, datetime) else str(ship_date)[:10] if ship_date else ''
+    label_items.append({
+        'customer': str(r[0]) if r[0] else '',
+        'order_no': str(r[1]) if r[1] else '',
+        'order_date': od,
+        'ship_date': sd,
+        'chisu': str(chisu),
+        'jaejil': str(jaejil),
+        'pumok': str(r[6]) if r[6] else '',
+        'qty': int(r[8]) if r[8] else 0
+    })
+
+# 치수+재질별 재고 lookup
+stock_lookup = {}
+for key, qty in stock.items():
+    # stock key = "재질|치수", lookup key = "치수|재질"
+    parts = key.split('|')
+    if len(parts) == 2:
+        stock_lookup[f"{parts[1]}|{parts[0]}"] = qty
+
+with open(f'{OUT}/label_data.json', 'w', encoding='utf-8') as f:
+    json.dump(label_items, f, ensure_ascii=False, separators=(',', ':'))
+with open(f'{OUT}/label_data.js', 'w', encoding='utf-8') as f:
+    f.write('var DATA_LABEL = ')
+    json.dump(label_items, f, ensure_ascii=False, separators=(',', ':'))
+    f.write(';\nvar STOCK_LOOKUP = ')
+    json.dump(stock_lookup, f, ensure_ascii=False, separators=(',', ':'))
+    f.write(';')
+print(f"  label_data.json: {len(label_items)}건, 재고 lookup: {len(stock_lookup)}건")
+
 print(f"\n  data500.json: {len(results)}개 품목")
 print(f"  data_wr.json: {len(items)}개 (선생산 {len(active)} + 생산중 {len(in_prod)})")
 

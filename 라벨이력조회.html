@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Soltri 라벨이력 조회</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a1a;min-height:100vh}
+
+/* 상단 입력 영역 */
+.top{background:#1e3a5f;padding:20px 24px;color:#fff}
+.top h1{font-size:22px;margin-bottom:4px}
+.top .sub{font-size:12px;color:#94a3b8;margin-bottom:16px}
+.input-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.input-group{display:flex;flex-direction:column;gap:4px}
+.input-group label{font-size:13px;color:#94a3b8;font-weight:600}
+.input-group input,.input-group select{font-size:18px;padding:10px 14px;border:2px solid #475569;border-radius:8px;background:#0f172a;color:#fff;width:160px;font-family:inherit}
+.input-group input:focus,.input-group select:focus{outline:none;border-color:#3b82f6}
+.input-group input::placeholder{color:#64748b;font-size:14px}
+.btn-search{font-size:18px;padding:10px 28px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;height:46px}
+.btn-search:hover{background:#2563eb}
+.btn-clear{font-size:14px;padding:10px 16px;background:#475569;color:#fff;border:none;border-radius:8px;cursor:pointer;height:46px}
+.btn-clear:hover{background:#64748b}
+.search-hint{font-size:11px;color:#64748b;margin-top:8px}
+
+/* 하단 2컬럼 */
+.content{display:flex;gap:16px;padding:16px 24px;height:calc(100vh - 180px);min-height:500px}
+
+/* 왼쪽: 소재 카드 */
+.left{width:280px;flex-shrink:0}
+.mat-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);height:100%;overflow-y:auto}
+.mat-card h2{font-size:16px;color:#1e3a5f;margin-bottom:12px;border-bottom:2px solid #e2e8f0;padding-bottom:8px}
+.mat-card .empty{color:#94a3b8;font-size:14px;text-align:center;padding:40px 0}
+.mat-info{margin-bottom:12px}
+.mat-info .mi-label{font-size:11px;color:#94a3b8;margin-bottom:2px}
+.mat-info .mi-value{font-size:18px;font-weight:800;color:#1e3a5f}
+.mat-stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.stat-box{background:#f8fafc;border-radius:8px;padding:10px;text-align:center;border:1px solid #e2e8f0}
+.stat-box .sv{font-size:22px;font-weight:800}
+.stat-box .sl{font-size:10px;color:#94a3b8;margin-top:2px}
+.stat-box.danger .sv{color:#ef4444}
+.stat-box.warn .sv{color:#f59e0b}
+.stat-box.ok .sv{color:#22c55e}
+.stat-box.info .sv{color:#3b82f6}
+
+/* 거래처 목록 */
+.cust-list{margin-top:12px}
+.cust-list h3{font-size:12px;color:#64748b;margin-bottom:6px}
+.cust-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.cust-item .cn{color:#334155}
+.cust-item .cq{font-weight:700;color:#1e3a5f}
+
+/* 오른쪽: 이력 */
+.right{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.hist-header h2{font-size:16px;color:#1e3a5f}
+.hist-count{font-size:13px;color:#64748b}
+.hist-scroll{flex:1;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.hist-scroll table{width:100%;border-collapse:collapse}
+.hist-scroll th{position:sticky;top:0;background:#1e3a5f;color:#fff;padding:10px 12px;text-align:left;font-size:13px;font-weight:600;z-index:1}
+.hist-scroll td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:14px}
+.hist-scroll tr:hover td{background:#f8fafc}
+.hist-scroll .date{color:#3b82f6;font-weight:600;white-space:nowrap}
+.hist-scroll .cust{color:#334155}
+.hist-scroll .qty{font-weight:700;color:#1e3a5f;text-align:right}
+.hist-scroll .order{font-size:11px;color:#94a3b8}
+.hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:16px}
+
+/* 반응형 */
+@media(max-width:768px){
+  .content{flex-direction:column;height:auto}
+  .left{width:100%}
+}
+</style>
+</head>
+<body>
+<script src="label_data.js" onerror="console.log('label_data.js 없음')"></script>
+
+<!-- 상단 입력 -->
+<div class="top">
+  <h1>Soltri 라벨이력 조회</h1>
+  <div class="sub">치수와 소재를 입력하면 발송 이력이 나옵니다</div>
+  <div class="input-row">
+    <div class="input-group">
+      <label>내경</label>
+      <input type="text" id="inD1" placeholder="예: 60" autofocus inputmode="decimal"
+             onkeydown="if(event.key==='Enter'){document.getElementById('inD2').focus();event.preventDefault()}">
+    </div>
+    <div class="input-group">
+      <label>외경</label>
+      <input type="text" id="inD2" placeholder="예: 65" inputmode="decimal"
+             onkeydown="if(event.key==='Enter'){document.getElementById('inD3').focus();event.preventDefault()}">
+    </div>
+    <div class="input-group">
+      <label>높이 (없으면 빈칸)</label>
+      <input type="text" id="inD3" placeholder="예: 10" inputmode="decimal"
+             onkeydown="if(event.key==='Enter'){document.getElementById('inMat').focus();event.preventDefault()}">
+    </div>
+    <div class="input-group">
+      <label>소재</label>
+      <select id="inMat" onkeydown="if(event.key==='Enter'){doSearch();event.preventDefault()}">
+        <option value="">전체</option>
+        <option value="CN10">CN10</option>
+        <option value="CN20">CN20</option>
+        <option value="CM20">CM20</option>
+        <option value="RS40">RS40</option>
+        <option value="RS20">RS20</option>
+        <option value="CG72">CG72</option>
+        <option value="M/P">M/P</option>
+        <option value="M/T">M/T</option>
+        <option value="M/NW">M/NW</option>
+      </select>
+    </div>
+    <button class="btn-search" onclick="doSearch()">검색</button>
+    <button class="btn-clear" onclick="doClear()">초기화</button>
+  </div>
+  <div class="search-hint">내경 → Enter → 외경 → Enter → 높이 → Enter → 소재 → Enter로 바로 검색됩니다</div>
+</div>
+
+<!-- 하단 -->
+<div class="content">
+  <!-- 왼쪽: 소재 정보 -->
+  <div class="left">
+    <div class="mat-card" id="matCard">
+      <h2>소재 정보</h2>
+      <div class="empty" id="matEmpty">치수를 입력하고<br>검색하세요</div>
+      <div id="matContent" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- 오른쪽: 이력 -->
+  <div class="right">
+    <div class="hist-header">
+      <h2>라벨 발송 이력</h2>
+      <span class="hist-count" id="histCount"></span>
+    </div>
+    <div class="hist-scroll" id="histScroll">
+      <div class="hist-empty" id="histEmpty">검색 결과가 여기에 표시됩니다</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let ALL_DATA = [];
+
+// 데이터 로드 (data_wr.js 방식 또는 JSON)
+function loadData() {
+  // 라벨 데이터는 Google Sheets에서 로드
+  const SHEET_ID = '1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0';
+  const TAB = '라벨조회';
+
+  // 로컬 JSON 먼저 시도
+  fetch('label_data.json')
+    .then(r => r.json())
+    .then(data => { ALL_DATA = data; console.log('로컬 로드:', data.length + '건'); })
+    .catch(() => {
+      // 로컬 없으면 빈 데이터
+      console.log('label_data.json 없음 - start.bat 실행 필요');
+    });
+}
+
+// DATA_LABEL 변수가 있으면 사용 (label_data.js)
+if (typeof DATA_LABEL !== 'undefined') {
+  ALL_DATA = DATA_LABEL;
+}
+
+function doSearch() {
+  const d1 = document.getElementById('inD1').value.trim();
+  const d2 = document.getElementById('inD2').value.trim();
+  const d3 = document.getElementById('inD3').value.trim();
+  const mat = document.getElementById('inMat').value;
+
+  if (!d1 && !d2) {
+    alert('내경 또는 외경을 입력하세요');
+    document.getElementById('inD1').focus();
+    return;
+  }
+
+  // 치수 조합
+  let searchChisu;
+  if (d3) {
+    searchChisu = d1 + '*' + d2 + '*' + d3;
+  } else if (d1 && d2) {
+    searchChisu = d1 + '*' + d2;
+  } else {
+    searchChisu = d1 || d2;
+  }
+
+  // 필터링
+  const results = ALL_DATA.filter(r => {
+    // 치수 매칭 (부분 매칭)
+    const chisuMatch = r.chisu && r.chisu.includes(searchChisu);
+    // 완전 매칭도 시도
+    const exactMatch = r.chisu === searchChisu;
+    // 소재 매칭
+    const matMatch = !mat || (r.jaejil && r.jaejil.startsWith(mat));
+
+    return (exactMatch || chisuMatch) && matMatch;
+  });
+
+  // 발송일 기준 최신순 정렬
+  results.sort((a, b) => (b.ship_date || '').localeCompare(a.ship_date || ''));
+
+  renderResults(results, searchChisu, mat);
+}
+
+function renderResults(results, chisu, mat) {
+  const matContent = document.getElementById('matContent');
+  const matEmpty = document.getElementById('matEmpty');
+  const histScroll = document.getElementById('histScroll');
+  const histCount = document.getElementById('histCount');
+  const histEmpty = document.getElementById('histEmpty');
+
+  if (results.length === 0) {
+    matEmpty.style.display = '';
+    matEmpty.innerHTML = '검색 결과 없음<br><span style="font-size:12px;color:#94a3b8">치수: ' + chisu + (mat ? ' / ' + mat : '') + '</span>';
+    matContent.style.display = 'none';
+    histScroll.innerHTML = '<div class="hist-empty">해당 치수/소재의 발송 이력이 없습니다</div>';
+    histCount.textContent = '';
+    return;
+  }
+
+  // 소재 카드
+  matEmpty.style.display = 'none';
+  matContent.style.display = '';
+
+  const totalQty = results.reduce((s, r) => s + (r.qty || 0), 0);
+  const custMap = {};
+  results.forEach(r => {
+    if (!custMap[r.customer]) custMap[r.customer] = { qty: 0, count: 0 };
+    custMap[r.customer].qty += (r.qty || 0);
+    custMap[r.customer].count++;
+  });
+  const custList = Object.entries(custMap).sort((a, b) => b[1].qty - a[1].qty);
+
+  // 재질별 분류
+  const jaejilMap = {};
+  results.forEach(r => {
+    const j = r.jaejil || '미상';
+    if (!jaejilMap[j]) jaejilMap[j] = 0;
+    jaejilMap[j] += (r.qty || 0);
+  });
+
+  // 최근 발송일
+  const latestDate = results[0] ? results[0].ship_date : '-';
+  const oldestDate = results[results.length - 1] ? results[results.length - 1].ship_date : '-';
+
+  // 재고 조회
+  const stockLookup = (typeof STOCK_LOOKUP !== 'undefined') ? STOCK_LOOKUP : {};
+  const jaejilKeys = Object.keys(jaejilMap);
+  let stockInfo = [];
+  jaejilKeys.forEach(j => {
+    const key = chisu + '|' + j;
+    const qty = stockLookup[key];
+    stockInfo.push({ jaejil: j, stock: qty !== undefined ? qty : -1 });
+  });
+  // 소재 1개면 바로, 여러개면 전부 표시
+  const mainStock = stockInfo.length === 1 ? stockInfo[0].stock : -2;
+  const stockColor = mainStock <= 0 ? '#ef4444' : mainStock <= 10 ? '#ef4444' : mainStock <= 50 ? '#f59e0b' : '#22c55e';
+
+  matContent.innerHTML = `
+    <div style="background:${mainStock >= 0 ? (mainStock <= 10 ? '#fef2f2' : mainStock <= 50 ? '#fffbeb' : '#f0fdf4') : '#f8fafc'};border:2px solid ${mainStock >= 0 ? stockColor : '#e2e8f0'};border-radius:10px;padding:14px;text-align:center;margin-bottom:12px">
+      <div style="font-size:12px;color:#64748b;margin-bottom:4px">현재고</div>
+      ${mainStock >= 0
+        ? `<div style="font-size:36px;font-weight:900;color:${stockColor}">${mainStock}개</div>`
+        : stockInfo.length > 1
+          ? stockInfo.map(s => `<div style="font-size:20px;font-weight:800;color:${s.stock >= 0 ? (s.stock <= 10 ? '#ef4444' : s.stock <= 50 ? '#f59e0b' : '#22c55e') : '#94a3b8'}">${s.jaejil}: ${s.stock >= 0 ? s.stock + '개' : '미확인'}</div>`).join('')
+          : `<div style="font-size:24px;font-weight:800;color:#94a3b8">미확인</div>`
+      }
+    </div>
+    <div class="mat-info"><div class="mi-label">치수</div><div class="mi-value">${chisu}</div></div>
+    <div class="mat-info"><div class="mi-label">소재</div><div class="mi-value">${mat || '전체'} ${jaejilKeys.length > 1 ? '(' + jaejilKeys.join(', ') + ')' : ''}</div></div>
+    <div class="mat-stat">
+      <div class="stat-box info"><div class="sv">${results.length}</div><div class="sl">발송 건수</div></div>
+      <div class="stat-box ok"><div class="sv">${totalQty.toLocaleString()}</div><div class="sl">총 주문량</div></div>
+      <div class="stat-box"><div class="sv" style="font-size:14px;color:#334155">${latestDate}</div><div class="sl">최근 발송</div></div>
+      <div class="stat-box"><div class="sv" style="font-size:14px;color:#334155">${oldestDate}</div><div class="sl">최초 발송</div></div>
+    </div>
+    <div class="cust-list">
+      <h3>거래처별 (${custList.length}개)</h3>
+      ${custList.map(([name, info]) => `<div class="cust-item"><span class="cn">${name} <span style="color:#94a3b8;font-size:11px">(${info.count}회)</span></span><span class="cq">${info.qty.toLocaleString()}개</span></div>`).join('')}
+    </div>
+  `;
+
+  // 이력 테이블
+  histCount.textContent = results.length + '건';
+  histScroll.innerHTML = `
+    <table>
+      <thead><tr>
+        <th style="width:100px">발송일</th>
+        <th>거래처</th>
+        <th>주문번호</th>
+        <th style="width:60px">소재</th>
+        <th style="width:60px">품목</th>
+        <th style="width:70px;text-align:right">수량</th>
+      </tr></thead>
+      <tbody>
+        ${results.map(r => `<tr>
+          <td class="date">${r.ship_date || '-'}</td>
+          <td class="cust">${r.customer || ''}</td>
+          <td class="order">${r.order_no || ''}</td>
+          <td>${r.jaejil || ''}</td>
+          <td>${r.pumok || ''}</td>
+          <td class="qty">${(r.qty || 0).toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function doClear() {
+  document.getElementById('inD1').value = '';
+  document.getElementById('inD2').value = '';
+  document.getElementById('inD3').value = '';
+  document.getElementById('inMat').value = '';
+  document.getElementById('matEmpty').style.display = '';
+  document.getElementById('matEmpty').innerHTML = '치수를 입력하고<br>검색하세요';
+  document.getElementById('matContent').style.display = 'none';
+  document.getElementById('histScroll').innerHTML = '<div class="hist-empty">검색 결과가 여기에 표시됩니다</div>';
+  document.getElementById('histCount').textContent = '';
+  document.getElementById('inD1').focus();
+}
+
+// 페이지 로드
+window.onload = function() {
+  if (typeof DATA_LABEL !== 'undefined' && DATA_LABEL.length > 0) {
+    ALL_DATA = DATA_LABEL;
+    console.log('label_data.js 로드:', ALL_DATA.length + '건');
+  } else {
+    loadData();
+  }
+  document.getElementById('inD1').focus();
+};
+</script>
+</body>
+</html>
