@@ -58,12 +58,12 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
 .hist-count{font-size:13px;color:#64748b}
 .hist-scroll{flex:1;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .hist-scroll{padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
-.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;width:calc(25% - 3px);box-sizing:border-box}
+.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;width:calc(25% - 3px);box-sizing:border-box}
 .hist-card:hover{background:#f8fafc}
-.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:15px}
+.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:22px}
 .hist-line1 .h-date{color:#3b82f6;font-weight:700}
-.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:18px}
-.hist-line2{margin-top:2px;font-size:12px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:28px}
+.hist-line2{margin-top:4px;font-size:18px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hist-line2 .h-cust{color:#334155;font-weight:600}
 .hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:18px;width:100%}
 .suggest-box{background:#fef2f2;border:3px solid #ef4444;border-radius:12px;padding:16px;text-align:center;margin-bottom:10px;width:100%}
@@ -145,7 +145,7 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
   <!-- 왼쪽: 고빈도 품목 카드 -->
   <div class="left" style="width:240px">
     <div class="mat-card" id="freqCard">
-      <h2 style="font-size:14px">고빈도 품목 <span style="font-size:11px;color:#94a3b8;font-weight:400" id="freqLoading">로딩중...</span></h2>
+      <h2 style="font-size:14px">선생산 필요 <span style="font-size:11px;color:#94a3b8;font-weight:400" id="freqLoading">로딩중...</span></h2>
       <div id="freqList" style="margin-top:8px"></div>
     </div>
   </div>
@@ -373,46 +373,62 @@ function doClear() {
   document.getElementById('inD1').focus();
 }
 
-// 고빈도 품목 카드 렌더링
+// 선생산 필요 품목 카드 렌더링 (Google Sheets 선생산리스트 탭)
 function renderFreqCards() {
   const freqList = document.getElementById('freqList');
   const freqLoading = document.getElementById('freqLoading');
-  if (!ALL_DATA.length) {
-    freqLoading.textContent = '로딩중...';
-    setTimeout(renderFreqCards, 500);
-    return;
-  }
-  freqLoading.textContent = '';
 
-  // 치수+재질별 빈도 집계
-  const freqMap = {};
-  ALL_DATA.forEach(r => {
-    const key = r.chisu + '|' + r.jaejil;
-    if (!freqMap[key]) freqMap[key] = { chisu: r.chisu, jaejil: r.jaejil, count: 0, totalQty: 0 };
-    freqMap[key].count++;
-    freqMap[key].totalQty += (r.qty || 0);
-  });
+  const cbName = '_loadProd_' + Date.now();
+  window[cbName] = function(resp) {
+    delete window[cbName];
+    freqLoading.textContent = '';
+    if (!resp || !resp.table || !resp.table.rows || !resp.table.rows.length) {
+      freqList.innerHTML = '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:20px">선생산리스트 없음</div>';
+      return;
+    }
+    // 선생산리스트: 치수(0), 재질(1), 품목(2), 주문횟수(3), 총수량(4), 평균(5), 현재고(6), 재고율(7), 생산중(8), 점수(9)
+    const items = resp.table.rows.map(function(row) {
+      const v = function(i) { return row.c[i] ? (row.c[i].v || '') : ''; };
+      return {
+        chisu: String(v(0)), jaejil: String(v(1)),
+        freq: parseInt(v(3)) || 0, totalQty: parseInt(v(4)) || 0,
+        stock: parseInt(v(6)), stockRatio: parseFloat(v(7)) || 0,
+        inProd: String(v(8)), score: parseFloat(v(9)) || 0
+      };
+    });
 
-  // 총주문량 1000 이상 제외 (고빈도 소량만), 빈도순 상위 50개
-  const sorted = Object.values(freqMap).filter(a => a.totalQty < 1000).sort((a, b) => b.count - a.count).slice(0, 50);
+    // 생산중=N이고 재고율 30% 이하인 품목만 (선생산 필요)
+    const active = items.filter(r => r.inProd !== 'Y' && r.stockRatio <= 30);
+    // 점수순 정렬
+    active.sort((a, b) => b.score - a.score);
 
-  freqList.innerHTML = sorted.map(item => {
-    const stockKey = item.chisu + '|' + item.jaejil;
-    const stk = STOCK[stockKey];
-    const hasStock = stk !== undefined;
-    const stockClass = !hasStock ? 'unknown' : stk <= 10 ? 'danger' : stk <= 50 ? 'warn' : 'ok';
-    const stockText = hasStock ? stk + '개' : '-';
-    const jaejilClass = 'fi-' + item.jaejil.replace(/[^A-Z0-9]/g, '');
+    freqList.innerHTML = active.map(item => {
+      const stk = item.stock;
+      const hasStock = stk >= 0;
+      const stockClass = !hasStock ? 'unknown' : stk <= 10 ? 'danger' : stk <= 50 ? 'warn' : 'ok';
+      const stockText = hasStock ? stk + '개' : '-';
+      const jaejilClass = 'fi-' + item.jaejil.replace(/[^A-Z0-9]/g, '');
 
-    return `<div class="freq-item" onclick="selectFreqCard('${item.chisu}','${item.jaejil}',this)">
-      <div class="fi-chisu">${item.chisu}</div>
-      <div class="fi-row">
-        <span class="fi-jaejil ${jaejilClass}">${item.jaejil}</span>
-        <span class="fi-info">${item.count}회 / ${item.totalQty}개</span>
-      </div>
-      <div class="fi-stock ${stockClass}">재고: ${stockText}</div>
-    </div>`;
-  }).join('');
+      return `<div class="freq-item" onclick="selectFreqCard('${item.chisu}','${item.jaejil}',this)">
+        <div class="fi-chisu">${item.chisu}</div>
+        <div class="fi-row">
+          <span class="fi-jaejil ${jaejilClass}">${item.jaejil}</span>
+          <span class="fi-info">${item.freq}회 / ${item.totalQty}개</span>
+        </div>
+        <div class="fi-stock ${stockClass}">재고: ${stockText}</div>
+      </div>`;
+    }).join('');
+
+    if (!active.length) {
+      freqList.innerHTML = '<div style="color:#22c55e;font-size:13px;text-align:center;padding:20px">선생산 필요 품목 없음!</div>';
+    }
+  };
+  const sc = document.createElement('script');
+  sc.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent('선생산리스트')}&tqx=responseHandler:${cbName}`;
+  sc.onerror = function() {
+    freqLoading.textContent = '로드 실패';
+  };
+  document.body.appendChild(sc);
 }
 
 function selectFreqCard(chisu, jaejil, el) {
