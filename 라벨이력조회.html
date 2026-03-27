@@ -340,7 +340,8 @@ function renderResults(results, chisu, mat) {
   // 추천 생산량 계산 (총주문량 - 100일간 평균)
   const avgQty = results.length > 0 ? Math.round(totalQty / results.length) : 0;
   const stk = stockInfo.length > 0 && stockInfo[0].stock >= 0 ? stockInfo[0].stock : 0;
-  const suggestQty = Math.max(0, totalQty - stk);
+  const suggestRaw = Math.max(0, totalQty - stk);
+  const suggestQty = Math.min(500, suggestRaw);
   const suggestCeil = Math.ceil(suggestQty / 10) * 10;
 
   // 이력 카드
@@ -348,7 +349,7 @@ function renderResults(results, chisu, mat) {
   histScroll.innerHTML = `<div class="suggest-box">
       <div class="sg-label">최대 생산 추천량</div>
       <div class="sg-value">${suggestCeil}개</div>
-      <div class="sg-detail">총주문 ${totalQty}개 − 현재고 ${stk}개 = ${suggestQty}개 (10단위 올림)</div>
+      <div class="sg-detail">총주문 ${totalQty}개 − 현재고 ${stk}개 = ${suggestRaw}개${suggestRaw > 500 ? ' → 최대 500개 제한' : ''} (10단위 올림)</div>
     </div>` + results.map(r => `<div class="hist-card">
     <div class="hist-line1">
       <span class="h-date">${r.ship_date || '-'}</span>
