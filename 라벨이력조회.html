@@ -101,16 +101,19 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
     <div class="input-group">
       <label>내경</label>
       <input type="text" id="inD1" placeholder="예: 60" autofocus inputmode="decimal"
+             onfocus="this.select()"
              onkeydown="if(event.key==='Enter'){document.getElementById('inD2').focus();event.preventDefault()}">
     </div>
     <div class="input-group">
       <label>외경</label>
       <input type="text" id="inD2" placeholder="예: 65" inputmode="decimal"
+             onfocus="this.select()"
              onkeydown="if(event.key==='Enter'){document.getElementById('inD3').focus();event.preventDefault()}">
     </div>
     <div class="input-group">
       <label>높이 (없으면 빈칸)</label>
       <input type="text" id="inD3" placeholder="예: 10" inputmode="decimal"
+             onfocus="this.select()"
              onkeydown="if(event.key==='Enter'){document.getElementById('inMat').focus();event.preventDefault()}">
     </div>
     <div class="input-group">
