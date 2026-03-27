@@ -57,16 +57,16 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
 .hist-header h2{font-size:16px;color:#1e3a5f}
 .hist-count{font-size:13px;color:#64748b}
 .hist-scroll{flex:1;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.hist-scroll{padding:8px}
-.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;margin-bottom:6px}
+.hist-scroll{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;width:calc(50% - 3px);box-sizing:border-box}
 .hist-card:hover{background:#f8fafc}
-.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:18px}
+.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:22px}
 .hist-line1 .h-date{color:#3b82f6;font-weight:700}
-.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:20px}
-.hist-line2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:14px;color:#64748b}
-.hist-line2 .h-cust{color:#334155;font-weight:600}
-.hist-line2 .h-order{font-size:12px;color:#94a3b8}
-.hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:18px}
+.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:26px}
+.hist-line2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:16px;color:#64748b}
+.hist-line2 .h-cust{color:#334155;font-weight:600;font-size:18px}
+.hist-line2 .h-order{font-size:14px;color:#94a3b8}
+.hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:18px;width:100%}
 
 /* 고빈도 카드 */
 .freq-item{background:#fff;border:2px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
