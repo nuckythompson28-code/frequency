@@ -426,6 +426,43 @@ try:
     ws_hist.update(values=hist_rows, range_name=f'A1:F{len(hist_rows)}')
     print(f"  → 주문이력 업로드 완료 ({len(history)}행)")
 
+    # 라벨조회 탭 (전체 라벨 이력)
+    try:
+        old_label = sh.worksheet("라벨조회")
+        sh.del_worksheet(old_label)
+    except gspread.exceptions.WorksheetNotFound:
+        pass
+
+    label_header = ['거래처','주문번호','주문일','발송일','치수','재질','품목','수량']
+    label_rows = [label_header]
+    for li in label_items:
+        label_rows.append([
+            li['customer'], li['order_no'], li['order_date'], li['ship_date'],
+            li['chisu'], li['jaejil'], li['pumok'], li['qty']
+        ])
+
+    ws_label = sh.add_worksheet(title="라벨조회", rows=len(label_rows)+5, cols=8)
+    ws_label.update(values=label_rows, range_name=f'A1:H{len(label_rows)}')
+    print(f"  → 라벨조회 업로드 완료 ({len(label_items)}행)")
+
+    # 재고현황 탭 (치수|재질 → 현재고)
+    try:
+        old_stock = sh.worksheet("재고현황")
+        sh.del_worksheet(old_stock)
+    except gspread.exceptions.WorksheetNotFound:
+        pass
+
+    stock_header = ['치수','재질','현재고']
+    stock_rows = [stock_header]
+    for sk, sq in stock.items():
+        parts = sk.split('|')
+        if len(parts) == 2:
+            stock_rows.append([parts[1], parts[0], sq])
+
+    ws_stock = sh.add_worksheet(title="재고현황", rows=len(stock_rows)+5, cols=3)
+    ws_stock.update(values=stock_rows, range_name=f'A1:C{len(stock_rows)}')
+    print(f"  → 재고현황 업로드 완료 ({len(stock_rows)-1}행)")
+
 except Exception as e:
     print(f"  → Google Sheets 업로드 실패: {e}")
     print(f"  → data_wr.json은 정상 저장됨 (로컬 사용 가능)")

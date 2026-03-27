@@ -143,26 +143,50 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
 
 <script>
 let ALL_DATA = [];
+let STOCK = {};  // 치수|재질 → 현재고
 
-// 데이터 로드 (data_wr.js 방식 또는 JSON)
+const SHEET_ID = '1zkyYFiX5MGkGj7cnjhpiPvlzHLwN0CZKMFnjl9tTzqA';
+
 function loadData() {
-  // 라벨 데이터는 Google Sheets에서 로드
-  const SHEET_ID = '1MsmVKtz5NTxIIoj3efXYPLEhL3GaONW5LAlRNjKk7s0';
-  const TAB = '라벨조회';
+  // 1. 라벨조회 탭 로드
+  const cbLabel = '_loadLabel_' + Date.now();
+  window[cbLabel] = function(resp) {
+    delete window[cbLabel];
+    if (resp && resp.table && resp.table.rows) {
+      ALL_DATA = resp.table.rows.map(function(row) {
+        const v = function(i) { return row.c[i] ? (row.c[i].v || '') : ''; };
+        return {
+          customer: String(v(0)), order_no: String(v(1)),
+          order_date: String(v(2)).slice(0,10), ship_date: String(v(3)).slice(0,10),
+          chisu: String(v(4)), jaejil: String(v(5)),
+          pumok: String(v(6)), qty: parseInt(v(7)) || 0
+        };
+      });
+      console.log('Google Sheets 라벨 로드:', ALL_DATA.length + '건');
+    }
+  };
+  const sc1 = document.createElement('script');
+  sc1.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent('라벨조회')}&tqx=responseHandler:${cbLabel}`;
+  document.body.appendChild(sc1);
 
-  // 로컬 JSON 먼저 시도
-  fetch('label_data.json')
-    .then(r => r.json())
-    .then(data => { ALL_DATA = data; console.log('로컬 로드:', data.length + '건'); })
-    .catch(() => {
-      // 로컬 없으면 빈 데이터
-      console.log('label_data.json 없음 - start.bat 실행 필요');
-    });
-}
-
-// DATA_LABEL 변수가 있으면 사용 (label_data.js)
-if (typeof DATA_LABEL !== 'undefined') {
-  ALL_DATA = DATA_LABEL;
+  // 2. 재고현황 탭 로드
+  const cbStock = '_loadStock_' + Date.now();
+  window[cbStock] = function(resp) {
+    delete window[cbStock];
+    if (resp && resp.table && resp.table.rows) {
+      resp.table.rows.forEach(function(row) {
+        const v = function(i) { return row.c[i] ? (row.c[i].v || '') : ''; };
+        const chisu = String(v(0));
+        const jaejil = String(v(1));
+        const qty = parseInt(v(2)) || 0;
+        if (chisu && jaejil) STOCK[chisu + '|' + jaejil] = qty;
+      });
+      console.log('Google Sheets 재고 로드:', Object.keys(STOCK).length + '건');
+    }
+  };
+  const sc2 = document.createElement('script');
+  sc2.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent('재고현황')}&tqx=responseHandler:${cbStock}`;
+  document.body.appendChild(sc2);
 }
 
 function doSearch() {
@@ -246,8 +270,8 @@ function renderResults(results, chisu, mat) {
   const latestDate = results[0] ? results[0].ship_date : '-';
   const oldestDate = results[results.length - 1] ? results[results.length - 1].ship_date : '-';
 
-  // 재고 조회
-  const stockLookup = (typeof STOCK_LOOKUP !== 'undefined') ? STOCK_LOOKUP : {};
+  // 재고 조회 (로컬 STOCK_LOOKUP 또는 Google Sheets STOCK)
+  const stockLookup = (typeof STOCK_LOOKUP !== 'undefined') ? STOCK_LOOKUP : STOCK;
   const jaejilKeys = Object.keys(jaejilMap);
   let stockInfo = [];
   jaejilKeys.forEach(j => {
@@ -326,7 +350,8 @@ function doClear() {
 window.onload = function() {
   if (typeof DATA_LABEL !== 'undefined' && DATA_LABEL.length > 0) {
     ALL_DATA = DATA_LABEL;
-    console.log('label_data.js 로드:', ALL_DATA.length + '건');
+    if (typeof STOCK_LOOKUP !== 'undefined') STOCK = STOCK_LOOKUP;
+    console.log('로컬 로드:', ALL_DATA.length + '건');
   } else {
     loadData();
   }
