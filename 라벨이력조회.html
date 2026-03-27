@@ -57,16 +57,19 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:
 .hist-header h2{font-size:16px;color:#1e3a5f}
 .hist-count{font-size:13px;color:#64748b}
 .hist-scroll{flex:1;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.hist-scroll{padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
-.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;width:calc(50% - 3px);box-sizing:border-box}
+.hist-scroll{padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
+.hist-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;width:calc(25% - 3px);box-sizing:border-box}
 .hist-card:hover{background:#f8fafc}
-.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:22px}
+.hist-line1{display:flex;justify-content:space-between;align-items:center;font-size:15px}
 .hist-line1 .h-date{color:#3b82f6;font-weight:700}
-.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:26px}
-.hist-line2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:16px;color:#64748b}
-.hist-line2 .h-cust{color:#334155;font-weight:600;font-size:18px}
-.hist-line2 .h-order{font-size:14px;color:#94a3b8}
+.hist-line1 .h-qty{font-weight:900;color:#1e3a5f;font-size:18px}
+.hist-line2{margin-top:2px;font-size:12px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-line2 .h-cust{color:#334155;font-weight:600}
 .hist-empty{text-align:center;padding:60px;color:#94a3b8;font-size:18px;width:100%}
+.suggest-box{background:#fef2f2;border:3px solid #ef4444;border-radius:12px;padding:16px;text-align:center;margin-bottom:10px;width:100%}
+.suggest-box .sg-label{font-size:13px;color:#64748b;margin-bottom:4px}
+.suggest-box .sg-value{font-size:40px;font-weight:900;color:#ef4444}
+.suggest-box .sg-detail{font-size:12px;color:#94a3b8;margin-top:4px}
 
 /* 고빈도 카드 */
 .freq-item{background:#fff;border:2px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
@@ -334,16 +337,25 @@ function renderResults(results, chisu, mat) {
     </div>
   `;
 
+  // 추천 생산량 계산 (총주문량 - 100일간 평균)
+  const avgQty = results.length > 0 ? Math.round(totalQty / results.length) : 0;
+  const stk = stockInfo.length > 0 && stockInfo[0].stock >= 0 ? stockInfo[0].stock : 0;
+  const suggestQty = Math.max(0, totalQty - stk);
+  const suggestCeil = Math.ceil(suggestQty / 10) * 10;
+
   // 이력 카드
   histCount.textContent = results.length + '건';
-  histScroll.innerHTML = results.map(r => `<div class="hist-card">
+  histScroll.innerHTML = `<div class="suggest-box">
+      <div class="sg-label">최대 생산 추천량</div>
+      <div class="sg-value">${suggestCeil}개</div>
+      <div class="sg-detail">총주문 ${totalQty}개 − 현재고 ${stk}개 = ${suggestQty}개 (10단위 올림)</div>
+    </div>` + results.map(r => `<div class="hist-card">
     <div class="hist-line1">
       <span class="h-date">${r.ship_date || '-'}</span>
       <span class="h-qty">${(r.qty || 0).toLocaleString()}개</span>
     </div>
     <div class="hist-line2">
-      <span class="h-cust">${r.customer || ''}</span>
-      <span class="h-order">${r.jaejil} · ${r.pumok || ''}</span>
+      <span class="h-cust">${r.customer || ''}</span> · ${r.jaejil}
     </div>
   </div>`).join('');
 }
